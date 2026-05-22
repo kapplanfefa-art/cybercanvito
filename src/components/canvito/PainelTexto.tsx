@@ -1,6 +1,7 @@
-import { Crown, Search, Sparkles, Type } from "lucide-react";
-import { memo, useCallback, useState } from "react";
+import { Crown, Search, Sparkles, Type, ChevronRight } from "lucide-react";
+import { memo, useCallback, useState, useMemo } from "react";
 import { useEditor } from "./editor-context";
+import { WORD_FONTS } from "./fonts-library";
 import { toast } from "sonner";
 
 type TextPreset = "caixa" | "titulo" | "subtitulo" | "corpo";
