@@ -44,6 +44,7 @@ export const TextToolbar = memo(function TextToolbar() {
   const [target, setTarget] = useState<TextLike | null>(null);
   const [, force] = useState(0);
   const rerender = useCallback(() => force((n) => n + 1), []);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
 
   const [fontOpen, setFontOpen] = useState(false);
   const [alignOpen, setAlignOpen] = useState(false);
@@ -72,6 +73,20 @@ export const TextToolbar = memo(function TextToolbar() {
     };
   }, [activeCanvas, rerender]);
 
+  // Close popovers on outside click
+  useEffect(() => {
+    if (!fontOpen && !alignOpen && !colorOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setFontOpen(false);
+        setAlignOpen(false);
+        setColorOpen(false);
+      }
+    };
+    window.addEventListener("mousedown", onDown);
+    return () => window.removeEventListener("mousedown", onDown);
+  }, [fontOpen, alignOpen, colorOpen]);
+
   const apply = useCallback(
     (mutator: (t: TextLike) => void) => {
       if (!target || !activeCanvas) return;
@@ -93,7 +108,6 @@ export const TextToolbar = memo(function TextToolbar() {
   const underline = Boolean(target.get("underline"));
   const linethrough = Boolean(target.get("linethrough"));
   const textAlign = ((target.get("textAlign") as string) || "left") as AlignKey;
-  const opacity = (target.get("opacity") as number) ?? 1;
 
   const isBold = fontWeight === "bold" || Number(fontWeight) >= 600;
   const isItalic = fontStyle === "italic";
@@ -114,8 +128,9 @@ export const TextToolbar = memo(function TextToolbar() {
 
   return (
     <div
-      className="pointer-events-auto absolute left-1/2 top-4 z-40 flex -translate-x-1/2 items-center gap-1 rounded-xl border border-black/5 bg-white px-2 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-1 ring-black/5"
+      ref={wrapRef}
       onMouseDown={(e) => e.stopPropagation()}
+      className="pointer-events-auto relative z-30 mx-auto mt-2 flex h-9 w-fit max-w-[95%] items-center gap-0.5 rounded-lg border border-[var(--neon-violet)]/40 bg-[oklch(0.18_0.04_280)]/90 px-1.5 text-[oklch(0.95_0.01_280)] shadow-[0_0_20px_oklch(0.55_0.28_295/0.35),0_8px_24px_oklch(0.1_0.04_280/0.5)] backdrop-blur-md"
     >
       {/* Font family */}
       <div className="relative">
@@ -125,22 +140,22 @@ export const TextToolbar = memo(function TextToolbar() {
             setAlignOpen(false);
             setColorOpen(false);
           }}
-          className="flex h-9 min-w-[140px] items-center justify-between gap-2 rounded-md border border-black/10 bg-white px-3 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
+          className="flex h-7 min-w-[110px] max-w-[140px] items-center justify-between gap-1.5 rounded-md border border-[var(--neon-violet)]/30 bg-[oklch(0.22_0.06_285)] px-2 text-xs font-medium text-[oklch(0.95_0.01_280)] hover:border-[var(--electric-blue)]/60 hover:bg-[oklch(0.26_0.07_285)]"
           style={{ fontFamily }}
         >
           <span className="truncate">{fontFamily}</span>
-          <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+          <ChevronDown className="h-3 w-3 shrink-0 opacity-70" />
         </button>
         {fontOpen && (
-          <div className="absolute left-0 top-11 z-50 w-64 rounded-lg border border-black/10 bg-white p-2 shadow-xl">
+          <div className="absolute left-0 top-9 z-50 w-64 rounded-lg border border-[var(--neon-violet)]/40 bg-[oklch(0.18_0.04_280)]/95 p-2 shadow-[0_10px_30px_oklch(0.55_0.28_295/0.35)] backdrop-blur-md">
             <div className="relative mb-2">
-              <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
+              <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[oklch(0.75_0.04_285)]" />
               <input
                 autoFocus
                 value={fontSearch}
                 onChange={(e) => setFontSearch(e.target.value)}
                 placeholder="Pesquisar fontes"
-                className="h-8 w-full rounded-md border border-black/10 bg-neutral-50 pl-7 pr-2 text-xs text-neutral-800 outline-none focus:border-neutral-400"
+                className="h-8 w-full rounded-md border border-[var(--neon-violet)]/30 bg-[oklch(0.22_0.06_285)] pl-7 pr-2 text-xs text-[oklch(0.95_0.01_280)] outline-none placeholder:text-[oklch(0.6_0.04_285)] focus:border-[var(--electric-blue)]"
               />
             </div>
             <div className="max-h-64 overflow-y-auto">
@@ -151,8 +166,8 @@ export const TextToolbar = memo(function TextToolbar() {
                     apply((t) => t.set("fontFamily", f));
                     setFontOpen(false);
                   }}
-                  className={`flex w-full items-center rounded-md px-2 py-1.5 text-left text-sm text-neutral-800 hover:bg-neutral-100 ${
-                    f === fontFamily ? "bg-neutral-100 font-semibold" : ""
+                  className={`flex w-full items-center rounded-md px-2 py-1.5 text-left text-sm text-[oklch(0.92_0.01_280)] hover:bg-[var(--neon-violet)]/20 hover:text-[var(--neon-violet)] ${
+                    f === fontFamily ? "bg-[var(--neon-violet)]/15 text-[var(--neon-violet)]" : ""
                   }`}
                   style={{ fontFamily: f }}
                 >
@@ -160,7 +175,7 @@ export const TextToolbar = memo(function TextToolbar() {
                 </button>
               ))}
               {filteredFonts.length === 0 && (
-                <p className="px-2 py-3 text-center text-xs text-neutral-500">Nenhuma fonte</p>
+                <p className="px-2 py-3 text-center text-xs text-[oklch(0.6_0.04_285)]">Nenhuma fonte</p>
               )}
             </div>
           </div>
@@ -170,24 +185,24 @@ export const TextToolbar = memo(function TextToolbar() {
       <Divider />
 
       {/* Font size */}
-      <div className="flex items-center gap-0.5 rounded-md border border-black/10">
+      <div className="flex h-7 items-center rounded-md border border-[var(--neon-violet)]/30 bg-[oklch(0.22_0.06_285)]">
         <button
           onClick={() => setSize(fontSize - 2)}
-          className="flex h-9 w-7 items-center justify-center text-neutral-700 hover:bg-neutral-100"
+          className="flex h-7 w-6 items-center justify-center text-[oklch(0.85_0.02_280)] hover:text-[var(--electric-blue)]"
         >
-          <Minus className="h-3.5 w-3.5" />
+          <Minus className="h-3 w-3" />
         </button>
         <input
           type="number"
           value={fontSize}
           onChange={(e) => setSize(Number(e.target.value) || fontSize)}
-          className="h-9 w-10 bg-transparent text-center text-sm font-medium text-neutral-800 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="h-7 w-9 bg-transparent text-center text-xs font-medium text-[oklch(0.95_0.01_280)] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />
         <button
           onClick={() => setSize(fontSize + 2)}
-          className="flex h-9 w-7 items-center justify-center text-neutral-700 hover:bg-neutral-100"
+          className="flex h-7 w-6 items-center justify-center text-[oklch(0.85_0.02_280)] hover:text-[var(--electric-blue)]"
         >
-          <Plus className="h-3.5 w-3.5" />
+          <Plus className="h-3 w-3" />
         </button>
       </div>
 
@@ -201,38 +216,38 @@ export const TextToolbar = memo(function TextToolbar() {
             setFontOpen(false);
             setAlignOpen(false);
           }}
-          className="flex h-9 w-9 flex-col items-center justify-center rounded-md hover:bg-neutral-100"
+          className="flex h-7 w-7 flex-col items-center justify-center rounded-md hover:bg-[var(--neon-violet)]/15"
           title="Cor do texto"
         >
-          <span className="text-sm font-bold leading-none text-neutral-800">A</span>
-          <span className="mt-0.5 h-1 w-5 rounded-sm" style={{ background: fill }} />
+          <span className="text-[11px] font-bold leading-none">A</span>
+          <span className="mt-0.5 h-[3px] w-4 rounded-sm" style={{ background: typeof fill === "string" ? fill : "#fff" }} />
         </button>
         {colorOpen && (
-          <div className="absolute left-0 top-11 z-50 rounded-lg border border-black/10 bg-white p-2 shadow-xl">
+          <div className="absolute left-0 top-9 z-50 rounded-lg border border-[var(--neon-violet)]/40 bg-[oklch(0.18_0.04_280)]/95 p-2 shadow-[0_10px_30px_oklch(0.55_0.28_295/0.35)] backdrop-blur-md">
             <input
               type="color"
               value={typeof fill === "string" ? fill : "#000000"}
               onChange={(e) => apply((t) => t.set("fill", e.target.value))}
-              className="h-10 w-32 cursor-pointer rounded border border-black/10 bg-transparent"
+              className="h-9 w-28 cursor-pointer rounded border border-[var(--neon-violet)]/30 bg-transparent"
             />
           </div>
         )}
       </div>
 
       <ToolBtn active={isBold} onClick={() => apply((t) => t.set("fontWeight", isBold ? "normal" : "bold"))} title="Negrito">
-        <Bold className="h-4 w-4" />
+        <Bold className="h-3.5 w-3.5" />
       </ToolBtn>
       <ToolBtn active={isItalic} onClick={() => apply((t) => t.set("fontStyle", isItalic ? "normal" : "italic"))} title="Itálico">
-        <Italic className="h-4 w-4" />
+        <Italic className="h-3.5 w-3.5" />
       </ToolBtn>
       <ToolBtn active={underline} onClick={() => apply((t) => t.set("underline", !underline))} title="Sublinhado">
-        <Underline className="h-4 w-4" />
+        <Underline className="h-3.5 w-3.5" />
       </ToolBtn>
       <ToolBtn active={linethrough} onClick={() => apply((t) => t.set("linethrough", !linethrough))} title="Tachado">
-        <Strikethrough className="h-4 w-4" />
+        <Strikethrough className="h-3.5 w-3.5" />
       </ToolBtn>
       <ToolBtn onClick={toggleCase} title="Maiúsculas/Minúsculas">
-        <CaseSensitive className="h-4 w-4" />
+        <CaseSensitive className="h-3.5 w-3.5" />
       </ToolBtn>
 
       <Divider />
@@ -245,13 +260,13 @@ export const TextToolbar = memo(function TextToolbar() {
             setFontOpen(false);
             setColorOpen(false);
           }}
-          className="flex h-9 w-9 items-center justify-center rounded-md text-neutral-700 hover:bg-neutral-100"
+          className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--neon-violet)]/15"
           title="Alinhamento"
         >
-          <AlignIcon className="h-4 w-4" />
+          <AlignIcon className="h-3.5 w-3.5" />
         </button>
         {alignOpen && (
-          <div className="absolute left-0 top-11 z-50 flex gap-0.5 rounded-lg border border-black/10 bg-white p-1 shadow-xl">
+          <div className="absolute left-0 top-9 z-50 flex gap-0.5 rounded-lg border border-[var(--neon-violet)]/40 bg-[oklch(0.18_0.04_280)]/95 p-1 shadow-[0_10px_30px_oklch(0.55_0.28_295/0.35)] backdrop-blur-md">
             {(Object.keys(ALIGN_ICONS) as AlignKey[]).map((k) => {
               const Icon = ALIGN_ICONS[k];
               return (
@@ -261,11 +276,11 @@ export const TextToolbar = memo(function TextToolbar() {
                     apply((t) => t.set("textAlign", k));
                     setAlignOpen(false);
                   }}
-                  className={`flex h-8 w-8 items-center justify-center rounded text-neutral-700 hover:bg-neutral-100 ${
-                    textAlign === k ? "bg-neutral-100" : ""
+                  className={`flex h-7 w-7 items-center justify-center rounded text-[oklch(0.92_0.01_280)] hover:bg-[var(--neon-violet)]/20 hover:text-[var(--neon-violet)] ${
+                    textAlign === k ? "bg-[var(--neon-violet)]/15 text-[var(--neon-violet)]" : ""
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-3.5 w-3.5" />
                 </button>
               );
             })}
@@ -274,57 +289,29 @@ export const TextToolbar = memo(function TextToolbar() {
       </div>
 
       <ToolBtn onClick={() => toast("Listas em breve")} title="Lista">
-        <List className="h-4 w-4" />
+        <List className="h-3.5 w-3.5" />
       </ToolBtn>
-
-      {/* Line height */}
-      <div className="flex items-center gap-1 rounded-md border border-black/10 px-1.5">
-        <span className="text-[10px] font-bold uppercase text-neutral-500">LH</span>
-        <input
-          type="number"
-          step={0.1}
-          min={0.5}
-          max={4}
-          value={Number(((target.get("lineHeight") as number) ?? 1.16).toFixed(2))}
-          onChange={(e) => apply((t) => t.set("lineHeight", Number(e.target.value) || 1))}
-          className="h-9 w-12 bg-transparent text-center text-sm text-neutral-800 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-        />
-      </div>
-
-      {/* Opacity */}
-      <div className="flex items-center gap-1 rounded-md border border-black/10 px-2">
-        <span className="text-[10px] font-bold uppercase text-neutral-500">Op</span>
-        <input
-          type="range"
-          min={0}
-          max={1}
-          step={0.05}
-          value={opacity}
-          onChange={(e) => apply((t) => t.set("opacity", Number(e.target.value)))}
-          className="h-9 w-20 accent-neutral-800"
-        />
-      </div>
 
       <Divider />
 
       <ToolBtn onClick={() => toast("Efeitos em breve")} title="Efeitos">
-        <Sparkles className="h-4 w-4" />
-        <span className="ml-1 text-xs font-medium">Efeitos</span>
+        <Sparkles className="h-3.5 w-3.5" />
+        <span className="ml-1 text-[11px] font-medium">Efeitos</span>
       </ToolBtn>
       <ToolBtn onClick={() => toast("Animações em breve")} title="Animar">
-        <PlayCircle className="h-4 w-4" />
-        <span className="ml-1 text-xs font-medium">Animar</span>
+        <PlayCircle className="h-3.5 w-3.5" />
+        <span className="ml-1 text-[11px] font-medium">Animar</span>
       </ToolBtn>
       <ToolBtn onClick={() => toast("Posição em breve")} title="Posição">
-        <Move className="h-4 w-4" />
-        <span className="ml-1 text-xs font-medium">Posição</span>
+        <Move className="h-3.5 w-3.5" />
+        <span className="ml-1 text-[11px] font-medium">Posição</span>
       </ToolBtn>
     </div>
   );
 });
 
 function Divider() {
-  return <div className="mx-0.5 h-6 w-px bg-black/10" />;
+  return <div className="mx-0.5 h-5 w-px bg-[var(--neon-violet)]/25" />;
 }
 
 function ToolBtn({
@@ -342,8 +329,8 @@ function ToolBtn({
     <button
       onClick={onClick}
       title={title}
-      className={`flex h-9 items-center justify-center rounded-md px-2 text-neutral-700 hover:bg-neutral-100 ${
-        active ? "bg-neutral-200 text-neutral-900" : ""
+      className={`flex h-7 items-center justify-center rounded-md px-1.5 text-[oklch(0.92_0.01_280)] transition-colors hover:bg-[var(--neon-violet)]/15 hover:text-[var(--neon-violet)] ${
+        active ? "bg-[var(--neon-violet)]/20 text-[var(--neon-violet)] shadow-[0_0_10px_oklch(0.55_0.28_295/0.4)]" : ""
       }`}
     >
       {children}
