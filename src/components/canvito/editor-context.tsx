@@ -103,7 +103,7 @@ type EditorCtx = {
   isProcessingMagic: boolean;
   uploadedFiles: UploadedFile[];
   removeUploadedFile: (id: string) => void;
-  addText: (text: string, options?: { fontSize?: number; fontWeight?: string }) => void;
+  addText: (text: string, options?: { fontSize?: number; fontWeight?: string; fontFamily?: string }) => void;
 };
 
 type CropOverlayObject = fabric.Rect & { isCropOverlay?: boolean };
