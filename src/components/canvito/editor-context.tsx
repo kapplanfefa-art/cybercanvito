@@ -1157,7 +1157,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
 
 
   const addText = useCallback(
-    (text: string, options: { fontSize?: number; fontWeight?: string } = {}) => {
+    (text: string, options: { fontSize?: number; fontWeight?: string; fontFamily?: string } = {}) => {
       const c = canvasesRef.current.get(activePageIdRef.current ?? "");
       if (!c) return;
 
