@@ -1168,7 +1168,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         originY: "center",
         fontSize: options.fontSize || 40,
         fontWeight: options.fontWeight || "normal",
-        fontFamily: "Inter, sans-serif",
+        fontFamily: options.fontFamily || "Inter, sans-serif",
         fill: "#000000",
         cornerColor: "#ffffff",
         cornerStrokeColor: "oklch(0.55 0.28 295)",
