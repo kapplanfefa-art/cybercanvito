@@ -32,10 +32,10 @@ export function CanvitoClient() {
           </ErrorBoundary>
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             <ErrorBoundary>
-              <Canvas />
+              <TextToolbar />
             </ErrorBoundary>
             <ErrorBoundary>
-              <TextToolbar />
+              <Canvas />
             </ErrorBoundary>
           </div>
         </main>
