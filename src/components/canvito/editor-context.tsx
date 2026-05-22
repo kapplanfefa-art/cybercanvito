@@ -103,6 +103,7 @@ type EditorCtx = {
   isProcessingMagic: boolean;
   uploadedFiles: UploadedFile[];
   removeUploadedFile: (id: string) => void;
+  addText: (text: string, options?: { fontSize?: number; fontWeight?: string }) => void;
 };
 
 type CropOverlayObject = fabric.Rect & { isCropOverlay?: boolean };
@@ -1155,6 +1156,39 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   );
 
 
+  const addText = useCallback(
+    (text: string, options: { fontSize?: number; fontWeight?: string } = {}) => {
+      const c = canvasesRef.current.get(activePageIdRef.current ?? "");
+      if (!c) return;
+
+      const textObj = new fabric.IText(text, {
+        left: artboard.width / 2,
+        top: artboard.height / 2,
+        originX: "center",
+        originY: "center",
+        fontSize: options.fontSize || 40,
+        fontWeight: options.fontWeight || "normal",
+        fontFamily: "Inter, sans-serif",
+        fill: "#000000",
+        cornerColor: "#ffffff",
+        cornerStrokeColor: "oklch(0.55 0.28 295)",
+        borderColor: "oklch(0.55 0.28 295)",
+        cornerSize: 12,
+        transparentCorners: false,
+        cornerStyle: "circle",
+      });
+
+      c.add(textObj);
+      if (trashControlRef.current) {
+        textObj.controls = { ...textObj.controls, deleteControl: trashControlRef.current };
+      }
+      c.setActiveObject(textObj);
+      c.requestRenderAll();
+      saveHistory();
+    },
+    [artboard.width, artboard.height, saveHistory],
+  );
+
   const addImageFromFile = useCallback(
     async (file: File, at?: ImageInsertPoint) => {
       if (!file.type.startsWith("image/")) return;
@@ -1378,12 +1412,13 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     applyMagicRemoval,
     uploadedFiles,
     removeUploadedFile,
+    addText,
   }), [
     activeCanvas, registerPageCanvas, setActivePageId, artboard, setArtboardPreset, preset, zoom,
     setZoom, fitToScreen, addImageFromSource, addImageFromFile, addVideoFromSource, addShapeFromUrl, openImagePicker, addPage,
     deletePage, deleteActiveObject, startCropMode, applyCrop, cancelCrop, isCropMode, getPageCanvas,
     pages, activePageId, undo, redo, historyTick, resetDesign, reorderPage, brushSize, isMagicBrushActive,
-    isProcessingMagic, clearMagicBrush, applyMagicRemoval, uploadedFiles, removeUploadedFile
+    isProcessingMagic, clearMagicBrush, applyMagicRemoval, uploadedFiles, removeUploadedFile, addText
   ]);
 
   return (

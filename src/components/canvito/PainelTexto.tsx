@@ -1,5 +1,6 @@
 import { Crown, Search, Sparkles, Type } from "lucide-react";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
+import { useEditor } from "./editor-context";
 import { toast } from "sonner";
 
 type TextPreset = "caixa" | "titulo" | "subtitulo" | "corpo";
@@ -12,11 +13,16 @@ const TEXT_PRESETS: Record<TextPreset, { label: string; log: string; fontSize: n
 };
 
 export const PainelTexto = memo(function PainelTexto() {
+  const { addText } = useEditor();
+  const [searchQuery, setSearchQuery] = useState("");
+
   const handleAddTextToCanvas = useCallback((type: TextPreset) => {
     const preset = TEXT_PRESETS[type];
-    console.log(`Adicionando ${preset.log} ao Canvas`);
-    toast.info("Ferramenta de texto temporariamente desativada");
-  }, []);
+    addText(preset.label === "Adicionar uma caixa de texto" ? "Sua caixa de texto" : preset.label, {
+      fontSize: preset.fontSize,
+      fontWeight: preset.fontWeight
+    });
+  }, [addText]);
 
   return (
     <div className="flex flex-col gap-4 p-3">
@@ -24,6 +30,8 @@ export const PainelTexto = memo(function PainelTexto() {
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input
           placeholder="Busque fontes e combinações"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="h-10 w-full rounded-md border border-border bg-secondary/70 pl-10 pr-3 text-sm text-panel-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-accent focus:ring-2 focus:ring-accent/30"
         />
       </div>
