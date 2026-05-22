@@ -103,7 +103,7 @@ type EditorCtx = {
   isProcessingMagic: boolean;
   uploadedFiles: UploadedFile[];
   removeUploadedFile: (id: string) => void;
-  addText: (text: string, options?: { fontSize?: number; fontWeight?: string }) => void;
+  addText: (text: string, options?: { fontSize?: number; fontWeight?: string; fontFamily?: string }) => void;
 };
 
 type CropOverlayObject = fabric.Rect & { isCropOverlay?: boolean };
@@ -1157,7 +1157,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
 
 
   const addText = useCallback(
-    (text: string, options: { fontSize?: number; fontWeight?: string } = {}) => {
+    (text: string, options: { fontSize?: number; fontWeight?: string; fontFamily?: string } = {}) => {
       const c = canvasesRef.current.get(activePageIdRef.current ?? "");
       if (!c) return;
 
@@ -1168,7 +1168,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         originY: "center",
         fontSize: options.fontSize || 40,
         fontWeight: options.fontWeight || "normal",
-        fontFamily: "Inter, sans-serif",
+        fontFamily: options.fontFamily || "Inter, sans-serif",
         fill: "#000000",
         cornerColor: "#ffffff",
         cornerStrokeColor: "oklch(0.55 0.28 295)",
