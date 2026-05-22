@@ -8,6 +8,7 @@ import { Canvas } from "./Canvas";
 import { BottomBar } from "./BottomBar";
 import { EditorProvider } from "./editor-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { TextToolbar } from "./TextToolbar";
 
 export function CanvitoClient() {
   const [activeTool, setActiveTool] = useState<ToolId | null>("elementos");
@@ -32,6 +33,9 @@ export function CanvitoClient() {
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             <ErrorBoundary>
               <Canvas />
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <TextToolbar />
             </ErrorBoundary>
           </div>
         </main>
