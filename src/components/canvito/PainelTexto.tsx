@@ -16,6 +16,14 @@ const TEXT_PRESETS: Record<TextPreset, { label: string; log: string; fontSize: n
 export const PainelTexto = memo(function PainelTexto() {
   const { addText } = useEditor();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showAllFonts, setShowAllFonts] = useState(false);
+
+  const filteredFonts = useMemo(() => {
+    if (!searchQuery) return WORD_FONTS;
+    return WORD_FONTS.filter(font => 
+      font.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
 
   const handleAddTextToCanvas = useCallback((type: TextPreset) => {
     const preset = TEXT_PRESETS[type];
