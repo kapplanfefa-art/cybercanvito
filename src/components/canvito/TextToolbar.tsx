@@ -193,7 +193,7 @@ export const TextToolbar = memo(function TextToolbar() {
                 <button
                   key={f}
                   onClick={() => {
-                    apply((t) => t.set("fontFamily", f));
+                    apply("fontFamily", f);
                     setFontOpen(false);
                   }}
                   className={`flex w-full items-center rounded-md px-2 py-1.5 text-left text-sm text-[oklch(0.92_0.01_280)] hover:bg-[var(--neon-violet)]/20 hover:text-[var(--neon-violet)] ${
