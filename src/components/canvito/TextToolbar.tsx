@@ -152,13 +152,7 @@ export const TextToolbar = memo(function TextToolbar() {
     f.toLowerCase().includes(fontSearch.toLowerCase()),
   );
 
-  const setSize = (n: number) => apply((t) => t.set("fontSize", Math.max(6, Math.min(400, n))));
-
-  const toggleCase = () => {
-    const text = (target.get("text") as string) || "";
-    const next = text === text.toUpperCase() ? text.toLowerCase() : text.toUpperCase();
-    apply((t) => t.set("text", next));
-  };
+  const setSize = useCallback((n: number) => apply("fontSize", Math.max(6, Math.min(400, n))), [apply]);
 
   const AlignIcon = ALIGN_ICONS[textAlign] ?? AlignLeft;
 
