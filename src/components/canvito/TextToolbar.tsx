@@ -111,8 +111,6 @@ export const TextToolbar = memo(function TextToolbar() {
     rerender();
   }, [target, activeCanvas, rerender]);
 
-  if (!target) return null;
-
   const fontFamily = (target.get("fontFamily") as string) || "Open Sans";
   const fontSize = Math.round((target.get("fontSize") as number) || 48);
   const fill = (target.get("fill") as string) || "#000000";
@@ -129,7 +127,9 @@ export const TextToolbar = memo(function TextToolbar() {
     f.toLowerCase().includes(fontSearch.toLowerCase()),
   );
 
-  const setSize = useCallback((n: number) => apply("fontSize", Math.max(6, Math.min(400, n))), [apply]);
+  const setSize = (n: number) => apply("fontSize", Math.max(6, Math.min(400, n)));
+
+  if (!target) return null;
 
   const AlignIcon = ALIGN_ICONS[textAlign] ?? AlignLeft;
 
