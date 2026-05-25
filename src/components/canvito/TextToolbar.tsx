@@ -129,7 +129,7 @@ export const TextToolbar = memo(function TextToolbar() {
     f.toLowerCase().includes(fontSearch.toLowerCase()),
   );
 
-  const setSize = useCallback((n: number) => apply("fontSize", Math.max(6, Math.min(400, n))), [apply]);
+  const setSize = (n: number) => apply("fontSize", Math.max(6, Math.min(400, n)));
 
   const AlignIcon = ALIGN_ICONS[textAlign] ?? AlignLeft;
 
