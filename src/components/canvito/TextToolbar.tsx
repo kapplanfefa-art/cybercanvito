@@ -88,9 +88,15 @@ export const TextToolbar = memo(function TextToolbar() {
   }, [fontOpen, alignOpen, colorOpen]);
 
   const apply = useCallback(
-    (mutator: (t: TextLike) => void) => {
+    (property: string, value: any) => {
       if (!target || !activeCanvas) return;
-      mutator(target);
+
+      if ((target as any).isEditing && (target as any).selectionStart !== (target as any).selectionEnd) {
+        target.setSelectionStyles({ [property]: value });
+      } else {
+        target.set(property, value);
+      }
+
       target.setCoords();
       activeCanvas.requestRenderAll();
       rerender();
