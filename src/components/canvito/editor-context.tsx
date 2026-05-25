@@ -333,9 +333,10 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     };
 
     trashControlRef.current = new fabric.Control({
-      x: 0,
+      x: 0.5,
       y: -0.5,
-      offsetY: -40,
+      offsetX: 18,
+      offsetY: -18,
       cursorStyle: "pointer",
       mouseUpHandler: (_eventData, transform) => {
         const target = transform.target;
