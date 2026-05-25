@@ -88,15 +88,51 @@ export const TextToolbar = memo(function TextToolbar() {
   }, [fontOpen, alignOpen, colorOpen]);
 
   const apply = useCallback(
-    (mutator: (t: TextLike) => void) => {
+    (property: string, value: any) => {
       if (!target || !activeCanvas) return;
-      mutator(target);
+
+      const t = target as any;
+      const selectionSupported = [
+        "fontFamily",
+        "fontSize",
+        "fill",
+        "fontWeight",
+        "fontStyle",
+        "underline",
+        "linethrough",
+      ].includes(property);
+
+      if (selectionSupported && t.isEditing && t.selectionStart !== t.selectionEnd) {
+        t.setSelectionStyles({ [property]: value }, t.selectionStart, t.selectionEnd);
+      } else {
+        target.set(property as any, value);
+      }
+
       target.setCoords();
       activeCanvas.requestRenderAll();
       rerender();
     },
     [target, activeCanvas, rerender],
   );
+
+  const toggleCase = useCallback(() => {
+    if (!target || !activeCanvas) return;
+    const t = target as any;
+
+    if (t.isEditing && t.selectionStart !== t.selectionEnd) {
+      const selectedText = t.getSelectedText();
+      const next = selectedText === selectedText.toUpperCase() ? selectedText.toLowerCase() : selectedText.toUpperCase();
+      t.insertChars(next, [], t.selectionStart, t.selectionEnd);
+    } else {
+      const text = (target.get("text") as string) || "";
+      const next = text === text.toUpperCase() ? text.toLowerCase() : text.toUpperCase();
+      target.set("text", next);
+    }
+
+    target.setCoords();
+    activeCanvas.requestRenderAll();
+    rerender();
+  }, [target, activeCanvas, rerender]);
 
   if (!target) return null;
 
@@ -116,13 +152,7 @@ export const TextToolbar = memo(function TextToolbar() {
     f.toLowerCase().includes(fontSearch.toLowerCase()),
   );
 
-  const setSize = (n: number) => apply((t) => t.set("fontSize", Math.max(6, Math.min(400, n))));
-
-  const toggleCase = () => {
-    const text = (target.get("text") as string) || "";
-    const next = text === text.toUpperCase() ? text.toLowerCase() : text.toUpperCase();
-    apply((t) => t.set("text", next));
-  };
+  const setSize = useCallback((n: number) => apply("fontSize", Math.max(6, Math.min(400, n))), [apply]);
 
   const AlignIcon = ALIGN_ICONS[textAlign] ?? AlignLeft;
 
@@ -163,7 +193,7 @@ export const TextToolbar = memo(function TextToolbar() {
                 <button
                   key={f}
                   onClick={() => {
-                    apply((t) => t.set("fontFamily", f));
+                    apply("fontFamily", f);
                     setFontOpen(false);
                   }}
                   className={`flex w-full items-center rounded-md px-2 py-1.5 text-left text-sm text-[oklch(0.92_0.01_280)] hover:bg-[var(--neon-violet)]/20 hover:text-[var(--neon-violet)] ${
@@ -227,23 +257,23 @@ export const TextToolbar = memo(function TextToolbar() {
             <input
               type="color"
               value={typeof fill === "string" ? fill : "#000000"}
-              onChange={(e) => apply((t) => t.set("fill", e.target.value))}
+              onChange={(e) => apply("fill", e.target.value)}
               className="h-9 w-28 cursor-pointer rounded border border-[var(--neon-violet)]/30 bg-transparent"
             />
           </div>
         )}
       </div>
 
-      <ToolBtn active={isBold} onClick={() => apply((t) => t.set("fontWeight", isBold ? "normal" : "bold"))} title="Negrito">
+      <ToolBtn active={isBold} onClick={() => apply("fontWeight", isBold ? "normal" : "bold")} title="Negrito">
         <Bold className="h-3.5 w-3.5" />
       </ToolBtn>
-      <ToolBtn active={isItalic} onClick={() => apply((t) => t.set("fontStyle", isItalic ? "normal" : "italic"))} title="Itálico">
+      <ToolBtn active={isItalic} onClick={() => apply("fontStyle", isItalic ? "normal" : "italic")} title="Itálico">
         <Italic className="h-3.5 w-3.5" />
       </ToolBtn>
-      <ToolBtn active={underline} onClick={() => apply((t) => t.set("underline", !underline))} title="Sublinhado">
+      <ToolBtn active={underline} onClick={() => apply("underline", !underline)} title="Sublinhado">
         <Underline className="h-3.5 w-3.5" />
       </ToolBtn>
-      <ToolBtn active={linethrough} onClick={() => apply((t) => t.set("linethrough", !linethrough))} title="Tachado">
+      <ToolBtn active={linethrough} onClick={() => apply("linethrough", !linethrough)} title="Tachado">
         <Strikethrough className="h-3.5 w-3.5" />
       </ToolBtn>
       <ToolBtn onClick={toggleCase} title="Maiúsculas/Minúsculas">
@@ -273,7 +303,7 @@ export const TextToolbar = memo(function TextToolbar() {
                 <button
                   key={k}
                   onClick={() => {
-                    apply((t) => t.set("textAlign", k));
+                    apply("textAlign", k);
                     setAlignOpen(false);
                   }}
                   className={`flex h-7 w-7 items-center justify-center rounded text-[oklch(0.92_0.01_280)] hover:bg-[var(--neon-violet)]/20 hover:text-[var(--neon-violet)] ${
