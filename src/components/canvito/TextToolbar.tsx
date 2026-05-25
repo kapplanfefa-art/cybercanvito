@@ -91,10 +91,21 @@ export const TextToolbar = memo(function TextToolbar() {
     (property: string, value: any) => {
       if (!target || !activeCanvas) return;
 
-      if ((target as any).isEditing && (target as any).selectionStart !== (target as any).selectionEnd) {
-        target.setSelectionStyles({ [property]: value });
+      const t = target as any;
+      const selectionSupported = [
+        "fontFamily",
+        "fontSize",
+        "fill",
+        "fontWeight",
+        "fontStyle",
+        "underline",
+        "linethrough",
+      ].includes(property);
+
+      if (selectionSupported && t.isEditing && t.selectionStart !== t.selectionEnd) {
+        t.setSelectionStyles({ [property]: value }, t.selectionStart, t.selectionEnd);
       } else {
-        target.set(property, value);
+        target.set(property as any, value);
       }
 
       target.setCoords();
@@ -103,6 +114,25 @@ export const TextToolbar = memo(function TextToolbar() {
     },
     [target, activeCanvas, rerender],
   );
+
+  const toggleCase = useCallback(() => {
+    if (!target || !activeCanvas) return;
+    const t = target as any;
+
+    if (t.isEditing && t.selectionStart !== t.selectionEnd) {
+      const selectedText = t.getSelectedText();
+      const next = selectedText === selectedText.toUpperCase() ? selectedText.toLowerCase() : selectedText.toUpperCase();
+      t.insertChars(next, [], t.selectionStart, t.selectionEnd);
+    } else {
+      const text = (target.get("text") as string) || "";
+      const next = text === text.toUpperCase() ? text.toLowerCase() : text.toUpperCase();
+      target.set("text", next);
+    }
+
+    target.setCoords();
+    activeCanvas.requestRenderAll();
+    rerender();
+  }, [target, activeCanvas, rerender]);
 
   if (!target) return null;
 
