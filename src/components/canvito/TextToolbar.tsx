@@ -129,7 +129,7 @@ export const TextToolbar = memo(function TextToolbar() {
   const toggleCase = useCallback(() => {
     if (!target || !activeCanvas) return;
     const t = target as any;
-    const text = (t.text as string) || "";
+    const text = (target.get("text") as string) || "";
     
     // Se estiver editando e houver seleção, aplica apenas ao trecho selecionado
     if (t.isEditing && t.selectionStart !== undefined && t.selectionStart !== t.selectionEnd) {
