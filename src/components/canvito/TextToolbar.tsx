@@ -91,7 +91,33 @@ export const TextToolbar = memo(function TextToolbar() {
     (property: string, value: any) => {
       if (!target || !activeCanvas) return;
 
-      target.set(property as any, value);
+      const t = target as any;
+      // "Salva a seleção antes de qualquer outra ação"
+      const selectionStart = t.selectionStart;
+      const selectionEnd = t.selectionEnd;
+      const isEditing = t.isEditing;
+
+      if (isEditing && typeof t.setSelectionStyles === "function" && selectionStart !== selectionEnd) {
+        // "Aplica a mudança apenas no texto selecionado"
+        const style: Record<string, any> = {};
+        style[property] = value;
+        
+        // "restaura ela antes de aplicar a fonte"
+        t.selectionStart = selectionStart;
+        t.selectionEnd = selectionEnd;
+        
+        t.setSelectionStyles(style);
+      } else {
+        // Se não houver seleção ou não estiver editando, aplica ao objeto todo
+        target.set(property as any, value);
+        
+        // Se estiver em modo de edição mas sem seleção, também define o estilo para o próximo caractere
+        if (isEditing && typeof t.setSelectionStyles === "function") {
+          const style: Record<string, any> = {};
+          style[property] = value;
+          t.setSelectionStyles(style);
+        }
+      }
 
       target.setCoords();
       activeCanvas.requestRenderAll();
@@ -102,11 +128,36 @@ export const TextToolbar = memo(function TextToolbar() {
 
   const toggleCase = useCallback(() => {
     if (!target || !activeCanvas) return;
+    const t = target as any;
     const text = (target.get("text") as string) || "";
-    const next = text === text.toUpperCase() ? text.toLowerCase() : text.toUpperCase();
-    target.set("text", next);
+    
+    // Se estiver editando e houver seleção, aplica apenas ao trecho selecionado
+    if (t.isEditing && t.selectionStart !== undefined && t.selectionStart !== t.selectionEnd) {
+      const start = t.selectionStart;
+      const end = t.selectionEnd;
+      const selectedText = text.substring(start, end);
+      const next = selectedText === selectedText.toUpperCase() ? selectedText.toLowerCase() : selectedText.toUpperCase();
+      
+      // No Fabric, para mudar o conteúdo de um trecho preservando estilos, usamos removeChars/insertChars
+      if (typeof t.removeChars === "function" && typeof t.insertChars === "function") {
+        t.removeChars(start, end);
+        t.insertChars(next, null, start);
+        
+        // Restaura a seleção
+        t.selectionStart = start;
+        t.selectionEnd = end;
+      } else {
+        // Fallback caso as funções não existam (improvável para IText/Textbox)
+        const newText = text.substring(0, start) + next + text.substring(end);
+        t.set("text", newText);
+      }
+    } else {
+      // Caso contrário, aplica ao texto todo
+      const next = text === text.toUpperCase() ? text.toLowerCase() : text.toUpperCase();
+      t.set("text", next);
+    }
 
-    target.setCoords();
+    t.setCoords();
     activeCanvas.requestRenderAll();
     rerender();
   }, [target, activeCanvas, rerender]);
