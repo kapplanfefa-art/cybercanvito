@@ -128,11 +128,36 @@ export const TextToolbar = memo(function TextToolbar() {
 
   const toggleCase = useCallback(() => {
     if (!target || !activeCanvas) return;
-    const text = (target.get("text") as string) || "";
-    const next = text === text.toUpperCase() ? text.toLowerCase() : text.toUpperCase();
-    target.set("text", next);
+    const t = target as any;
+    const text = (t.text as string) || "";
+    
+    // Se estiver editando e houver seleção, aplica apenas ao trecho selecionado
+    if (t.isEditing && t.selectionStart !== undefined && t.selectionStart !== t.selectionEnd) {
+      const start = t.selectionStart;
+      const end = t.selectionEnd;
+      const selectedText = text.substring(start, end);
+      const next = selectedText === selectedText.toUpperCase() ? selectedText.toLowerCase() : selectedText.toUpperCase();
+      
+      // No Fabric, para mudar o conteúdo de um trecho preservando estilos, usamos removeChars/insertChars
+      if (typeof t.removeChars === "function" && typeof t.insertChars === "function") {
+        t.removeChars(start, end);
+        t.insertChars(next, null, start);
+        
+        // Restaura a seleção
+        t.selectionStart = start;
+        t.selectionEnd = end;
+      } else {
+        // Fallback caso as funções não existam (improvável para IText/Textbox)
+        const newText = text.substring(0, start) + next + text.substring(end);
+        t.set("text", newText);
+      }
+    } else {
+      // Caso contrário, aplica ao texto todo
+      const next = text === text.toUpperCase() ? text.toLowerCase() : text.toUpperCase();
+      t.set("text", next);
+    }
 
-    target.setCoords();
+    t.setCoords();
     activeCanvas.requestRenderAll();
     rerender();
   }, [target, activeCanvas, rerender]);
