@@ -91,7 +91,33 @@ export const TextToolbar = memo(function TextToolbar() {
     (property: string, value: any) => {
       if (!target || !activeCanvas) return;
 
-      target.set(property as any, value);
+      const t = target as any;
+      // "Salva a seleção antes de qualquer outra ação"
+      const selectionStart = t.selectionStart;
+      const selectionEnd = t.selectionEnd;
+      const isEditing = t.isEditing;
+
+      if (isEditing && typeof t.setSelectionStyles === "function" && selectionStart !== selectionEnd) {
+        // "Aplica a mudança apenas no texto selecionado"
+        const style: Record<string, any> = {};
+        style[property] = value;
+        
+        // "restaura ela antes de aplicar a fonte"
+        t.selectionStart = selectionStart;
+        t.selectionEnd = selectionEnd;
+        
+        t.setSelectionStyles(style);
+      } else {
+        // Se não houver seleção ou não estiver editando, aplica ao objeto todo
+        target.set(property as any, value);
+        
+        // Se estiver em modo de edição mas sem seleção, também define o estilo para o próximo caractere
+        if (isEditing && typeof t.setSelectionStyles === "function") {
+          const style: Record<string, any> = {};
+          style[property] = value;
+          t.setSelectionStyles(style);
+        }
+      }
 
       target.setCoords();
       activeCanvas.requestRenderAll();
