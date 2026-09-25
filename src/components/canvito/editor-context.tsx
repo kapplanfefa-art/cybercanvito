@@ -1094,11 +1094,66 @@ export function EditorProvider({ children }: { children: ReactNode }) {
 
   const addVideoFromSource = useCallback(
     async (src: string) => {
-      toast.info("Em breve: edição de vídeo no canvas", {
-        icon: <Video className="h-4 w-4" />,
-      });
+      const c = canvasesRef.current.get(activePageIdRef.current ?? "");
+      if (!c) return;
+      const load = (cors: boolean) =>
+        new Promise<HTMLVideoElement>((resolve, reject) => {
+          const v = document.createElement("video");
+          if (cors) v.crossOrigin = "anonymous";
+          v.muted = true;
+          v.loop = true;
+          v.playsInline = true;
+          v.preload = "auto";
+          v.onloadeddata = () => resolve(v);
+          v.onerror = () => reject(new Error("video load failed"));
+          v.src = src;
+        });
+      try {
+        let video: HTMLVideoElement;
+        try {
+          video = await load(true);
+        } catch {
+          video = await load(false);
+        }
+        video.width = video.videoWidth;
+        video.height = video.videoHeight;
+        const vid = new fabric.FabricImage(video, { objectCaching: false });
+        const aw = artboard.width;
+        const ah = artboard.height;
+        const scale = Math.min((aw * 0.8) / video.videoWidth, (ah * 0.8) / video.videoHeight, 1);
+        vid.scale(scale);
+        vid.set({
+          left: aw / 2,
+          top: ah / 2,
+          originX: "center",
+          originY: "center",
+          cornerColor: "#ffffff",
+          cornerStrokeColor: "oklch(0.55 0.28 295)",
+          borderColor: "oklch(0.55 0.28 295)",
+          cornerSize: 12,
+          transparentCorners: false,
+          cornerStyle: "circle",
+        });
+        c.add(vid);
+        if (trashControlRef.current) {
+          vid.controls = { ...vid.controls, deleteControl: trashControlRef.current };
+        }
+        c.setActiveObject(vid);
+        await video.play().catch(() => {});
+        const tick = () => {
+          if (!vid.canvas) return;
+          c.requestRenderAll();
+          requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      } catch (err) {
+        console.error("Falha ao adicionar vídeo:", err);
+        toast.error("Não foi possível adicionar o vídeo ao canvas.", {
+          icon: <Video className="h-4 w-4" />,
+        });
+      }
     },
-    [],
+    [artboard.width, artboard.height],
   );
 
   const addShapeFromUrl = useCallback(
