@@ -317,6 +317,7 @@ export const TopBar = memo(function TopBar() {
             </button>
           </div>
         ) : (
+          <>
           <button
             onClick={() => setIsAiEditOpen(true)}
             className="inline-flex items-center gap-2 rounded-md border border-[var(--electric-blue)]/60 bg-[var(--electric-blue)]/15 px-2 py-1.5 text-xs font-bold text-white shadow-[0_0_18px_oklch(0.65_0.2_260/0.25)] transition-all hover:bg-[var(--electric-blue)]/25 hover:shadow-[0_0_26px_oklch(0.65_0.2_260/0.45)] active:scale-95 sm:px-3 sm:text-sm"
