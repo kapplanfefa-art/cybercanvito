@@ -1,6 +1,7 @@
 import { memo, useCallback, useState, type ComponentType, type ReactNode } from "react";
 import { ResizeModal } from "./ResizeModal";
 import { ExportModal } from "./ExportModal";
+import { AiEditModal } from "./AiEditModal";
 
 import * as fabric from "fabric";
 import {
@@ -22,6 +23,7 @@ import {
   Settings,
   Share2,
   Scaling,
+  Sparkles,
   Smartphone,
   Square,
   RectangleVertical,
@@ -69,6 +71,7 @@ export const TopBar = memo(function TopBar() {
   const [name, setName] = useState("Design sem nome");
   const [isResizeOpen, setIsResizeOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isAiEditOpen, setIsAiEditOpen] = useState(false);
 
   const {
     activeCanvas,
@@ -314,6 +317,14 @@ export const TopBar = memo(function TopBar() {
             </button>
           </div>
         ) : (
+          <>
+          <button
+            onClick={() => setIsAiEditOpen(true)}
+            className="inline-flex items-center gap-2 rounded-md border border-[var(--electric-blue)]/60 bg-[var(--electric-blue)]/15 px-2 py-1.5 text-xs font-bold text-white shadow-[0_0_18px_oklch(0.65_0.2_260/0.25)] transition-all hover:bg-[var(--electric-blue)]/25 hover:shadow-[0_0_26px_oklch(0.65_0.2_260/0.45)] active:scale-95 sm:px-3 sm:text-sm"
+          >
+            <Sparkles className="h-4 w-4 text-[var(--neon-cyan)]" />
+            <span className="hidden md:inline">Editar com IA</span>
+          </button>
           <button 
             onClick={() => setIsExportOpen(true)}
             className="inline-flex items-center gap-2 rounded-md bg-white px-2 py-1.5 text-xs font-bold text-[var(--background)] shadow-[0_0_24px_oklch(1_0_0/0.3)] transition-all hover:scale-[1.02] hover:shadow-[0_0_32px_oklch(1_0_0/0.5)] active:scale-95 sm:px-4 sm:text-sm"
@@ -321,10 +332,12 @@ export const TopBar = memo(function TopBar() {
             <Download className="h-4 w-4 md:hidden" />
             <span className="hidden md:inline">Exportar</span>
           </button>
+          </>
         )}
       </div>
       <ResizeModal open={isResizeOpen} onOpenChange={setIsResizeOpen} />
       <ExportModal open={isExportOpen} onOpenChange={setIsExportOpen} projectName={name} />
+      <AiEditModal open={isAiEditOpen} onOpenChange={setIsAiEditOpen} />
     </header>
 
   );
