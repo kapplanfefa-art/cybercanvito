@@ -23,6 +23,7 @@ import {
   Settings,
   Share2,
   Scaling,
+  Sparkles,
   Smartphone,
   Square,
   RectangleVertical,
