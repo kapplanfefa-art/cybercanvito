@@ -332,6 +332,7 @@ export const TopBar = memo(function TopBar() {
             <Download className="h-4 w-4 md:hidden" />
             <span className="hidden md:inline">Exportar</span>
           </button>
+          </>
         )}
       </div>
       <ResizeModal open={isResizeOpen} onOpenChange={setIsResizeOpen} />
