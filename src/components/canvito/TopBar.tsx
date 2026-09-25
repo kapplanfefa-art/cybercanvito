@@ -1,6 +1,7 @@
 import { memo, useCallback, useState, type ComponentType, type ReactNode } from "react";
 import { ResizeModal } from "./ResizeModal";
 import { ExportModal } from "./ExportModal";
+import { AiEditModal } from "./AiEditModal";
 
 import * as fabric from "fabric";
 import {
@@ -69,6 +70,7 @@ export const TopBar = memo(function TopBar() {
   const [name, setName] = useState("Design sem nome");
   const [isResizeOpen, setIsResizeOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isAiEditOpen, setIsAiEditOpen] = useState(false);
 
   const {
     activeCanvas,
