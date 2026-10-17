@@ -1,4 +1,4 @@
 # Correção de edição de texto
-- [ ] Corrigir preservação do trecho selecionado e aplicação à caixa inteira sem seleção.
-- [ ] Corrigir leitura e alteração do tamanho de fonte.
-- [ ] Testar regras e verificar o fluxo no editor.
+- [x] Corrigir preservação do trecho selecionado e aplicação à caixa inteira sem seleção.
+- [x] Corrigir leitura e alteração do tamanho de fonte.
+- [x] Testar regras e verificar o fluxo no editor.
