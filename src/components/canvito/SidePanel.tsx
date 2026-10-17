@@ -1,3 +1,4 @@
+import { AiMagicPanel } from "./AiMagicPanel";
 import { X, Search, Sparkles, Scissors, Scan, Trash2, ArrowLeft, Wand2, Image as ImageIcon, Video, Music, Shapes as ShapesIcon, Minus, Box, StickyNote, BarChart3, Frame, Grid, Table } from "lucide-react";
 import { memo, useCallback, useState, useMemo, useEffect } from "react";
 import { SHAPES } from "./shapes-library";
@@ -140,7 +141,9 @@ export const SidePanel = memo(function SidePanel({
       </div>
 
       <div className="flex-1 overflow-y-auto p-3">
-        {active === "texto" ? (
+        {active === "ia-magica" ? (
+          <AiMagicPanel />
+        ) : active === "texto" ? (
           <PainelTexto />
         ) : active === "elementos" && (shapesOpen || linesOpen || iconsOpen || stickersOpen || graphicsOpen || framesOpen || gridsOpen || tablesOpen) ? (
           <div className="flex flex-col gap-3">
