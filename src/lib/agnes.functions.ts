@@ -101,17 +101,17 @@ export const criarVideoAgnes = createServerFn({ method: "POST" })
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
         body: JSON.stringify({
-          model: "agnes-video-v2.0",
+          model: "agnes-video-2.5",
           prompt: data.prompt,
-          height: 768,
-          width: 1152,
-          num_frames: 121,
-          frame_rate: 24,
+          mode: "text",
+          seconds: "5",
+          size: "720P",
+          aspect_ratio: "16:9",
         }),
       });
       const json = (await res.json().catch(() => null)) as Record<string, any> | null;
       if (!res.ok) {
-        return { ok: false as const, error: json?.error?.message ?? `Agnes AI respondeu com status ${res.status}` };
+        return { ok: false as const, error: json?.error?.message ?? json?.message ?? `Agnes AI respondeu com status ${res.status}` };
       }
       const videoId = json?.video_id ?? json?.id ?? json?.task_id ?? json?.data?.video_id;
       if (!videoId) return { ok: false as const, error: "A Agnes AI não retornou o ID do vídeo." };
@@ -128,7 +128,7 @@ export const consultarVideoAgnes = createServerFn({ method: "POST" })
     const apiKey = process.env["AGNES_API_KEY"];
     if (!apiKey) return { status: "failed" as const, error: "Chave da Agnes AI não configurada." };
     try {
-      const res = await fetch(`${API_ROOT}/agnesapi?video_id=${encodeURIComponent(data.videoId)}`, {
+      const res = await fetch(`${API_ROOT}/agnesapi?video_id=${encodeURIComponent(data.videoId)}&model_name=agnes-video-2.5`, {
         headers: { Authorization: `Bearer ${apiKey}` },
       });
       const json = (await res.json().catch(() => null)) as Record<string, any> | null;
