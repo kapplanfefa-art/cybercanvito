@@ -47,7 +47,7 @@ export function AiEditModal({
   const handleAddToCanvas = useCallback(async () => {
     if (!resultUrl) return;
     try {
-      await addImageFromSource(resultUrl, undefined, "ia-agnes.png", true);
+      await addImageFromSource(resultUrl, undefined, "ia-agnes.png");
       toast.success("Imagem adicionada ao canvas");
       onOpenChange(false);
       setResultUrl(null);
