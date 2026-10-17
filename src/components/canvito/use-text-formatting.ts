@@ -90,7 +90,11 @@ export function useTextFormatting(canvas: Canvas | null) {
     const next = text === text.toUpperCase() ? text.toLowerCase() : text.toUpperCase();
     const oldStyles = target.getSelectionStyles(start, end, true);
     const chars = target.graphemeSplit(next);
-    target.insertChars(next, chars.map((_, i) => oldStyles[Math.min(i, oldStyles.length - 1)] ?? {}), start, end);
+    if (isEditable(target)) {
+      target.insertChars(next, chars.map((_, i) => oldStyles[Math.min(i, oldStyles.length - 1)] ?? {}), start, end);
+    } else {
+      target.set("text", next);
+    }
     if (range && isEditable(target)) {
       rangeRef.current = { start, end: start + chars.length };
       target.selectionStart = start;

@@ -1,10 +1,15 @@
-import type { FabricText, TextStyleDeclaration } from "fabric";
+import type { TextStyleDeclaration } from "fabric";
 
 export interface TextRange { start: number; end: number }
 export type CharacterProperty = keyof TextStyleDeclaration;
-export type FormattingTarget = Pick<FabricText,
-  "set" | "removeStyle" | "setSelectionStyles" | "getSelectionStyles" | "initDimensions" | "setCoords"
->;
+export interface FormattingTarget {
+  set(key: string | Record<string, unknown>, value?: unknown): unknown;
+  removeStyle(property: CharacterProperty): void;
+  setSelectionStyles(style: object, start: number, end: number): unknown;
+  getSelectionStyles(start: number, end: number, complete?: boolean): TextStyleDeclaration[];
+  initDimensions(): void;
+  setCoords(): void;
+}
 
 /** Ranges use Fabric's grapheme indexes, not JavaScript string offsets. */
 export function applyTextStyle<K extends CharacterProperty>(
