@@ -5,6 +5,10 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Canvito — Editor gráfico cyberpunk" },
+      { property: "og:title", content: "Canvito — Editor gráfico cyberpunk" },
+      { property: "og:description", content: "Crie, edite e exporte designs no Canvito com ferramentas de texto e IA mágica." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         name: "description",
         content: "Canvito: editor gráfico com estética cyberpunk neon. Crie, edite e exporte designs com IA mágica.",
