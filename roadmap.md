@@ -12,5 +12,5 @@
 - [x] Testar cópias independentes, repetição e preservação dos demais itens inativos.
 
 # Reabertura do menu no papel
-- [ ] Abrir o mesmo menu em qualquer área do papel que contenha imagem ou vídeo.
-- [ ] Verificar reabertura na área em branco após Copiar e Colar.
+- [x] Abrir o mesmo menu em qualquer área do papel que contenha imagem ou vídeo.
+- [x] Verificar reabertura na área em branco após Copiar e Colar.
