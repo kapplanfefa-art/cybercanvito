@@ -5,7 +5,7 @@ import type * as fabric from "fabric";
 import { useEditor, type UploadedFile } from "./editor-context";
 import { MediaContextMenu } from "./MediaContextMenu";
 import { createMediaClipboard } from "./media-clipboard";
-import { pageHasMedia } from "./media-menu-policy";
+import { canRemoveMedia, pageHasMedia } from "./media-menu-policy";
 
 /** What was hit on right-click — used to choose menu options. */
 type CtxMenuState = {
@@ -426,7 +426,11 @@ const PageBoard = memo(function PageBoard({
         {contextMenu?.isMedia && (
           <MediaContextMenu x={contextMenu.clientX} y={contextMenu.clientY} onClose={closeContextMenu}
             onCopy={() => onCopyMedia(getPageCanvas(pageId))}
-            onPaste={() => onPasteMedia(getPageCanvas(pageId))} />
+            onPaste={() => onPasteMedia(getPageCanvas(pageId))}
+            canDelete={canRemoveMedia(getPageCanvas(pageId)?.getActiveObject())}
+            onDelete={() => {
+              if (canRemoveMedia(getPageCanvas(pageId)?.getActiveObject())) onDeleteObjectFromMenu();
+            }} />
         )}
         {contextMenu && !contextMenu.isMedia && (
           <div

@@ -7,3 +7,7 @@ interface PageMenuObject {
 export function pageHasMedia(objects: readonly PageMenuObject[]): boolean {
   return objects.some(object => !object.isArtboard && object.isType("image"));
 }
+
+export function canRemoveMedia(object: PageMenuObject | null | undefined): boolean {
+  return Boolean(object && !object.isArtboard && object.isType("image"));
+}

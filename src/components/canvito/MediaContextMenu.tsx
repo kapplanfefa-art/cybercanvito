@@ -17,7 +17,7 @@ interface MenuEntry {
   divider?: boolean;
   muted?: boolean;
   premium?: boolean;
-  action?: "copy" | "paste";
+  action?: "copy" | "paste" | "delete";
 }
 
 const entries: MenuEntry[] = [
@@ -25,7 +25,7 @@ const entries: MenuEntry[] = [
   { label: "Copiar estilo", icon: PaintRoller, submenu: true },
   { label: "Colar", icon: Clipboard, shortcut: "Ctrl+V", action: "paste" },
   { label: "Duplicar", icon: CopyPlus, shortcut: "Ctrl+D" },
-  { label: "Excluir", icon: Trash2, shortcut: "DELETE" },
+  { label: "Excluir", icon: Trash2, shortcut: "DELETE", action: "delete" },
   { label: "Camada", icon: Layers, submenu: true, divider: true },
   { label: "Alinhar à página", icon: AlignStartVertical, submenu: true },
   { label: "Redimensionar a tela de acordo com a seleção", icon: MoveHorizontal, premium: true, divider: true },
@@ -48,10 +48,12 @@ export interface MediaContextMenuProps extends ComponentProps<"div"> {
   onClose: () => void;
   onCopy: () => void;
   onPaste: () => void;
+  onDelete: () => void;
+  canDelete: boolean;
 }
 
-/** Only explicitly requested clipboard actions are enabled. */
-export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, className, ...props }: MediaContextMenuProps) {
+/** Only explicitly requested actions are enabled. */
+export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, canDelete, className, ...props }: MediaContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const menu = ref.current;
@@ -92,8 +94,14 @@ export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, className, ..
           <Button
             variant="ghost"
             role="menuitem"
-            aria-disabled={!action}
-            onClick={action ? () => { if (action === "copy") onCopy(); else onPaste(); onClose(); } : undefined}
+            aria-disabled={!action || (action === "delete" && !canDelete)}
+            onClick={action ? () => {
+              if (action === "delete" && !canDelete) return;
+              if (action === "copy") onCopy();
+              else if (action === "paste") onPaste();
+              else onDelete();
+              onClose();
+            } : undefined}
             className={cn("h-[34px] w-full justify-start gap-2.5 rounded px-2 text-left text-sm font-normal text-card-foreground hover:bg-context-hover hover:text-card-foreground focus-visible:bg-context-hover [&_svg]:size-5", muted && "text-context-muted")}
           >
             <Icon aria-hidden="true" />
