@@ -18,7 +18,7 @@ export function canMoveLayer(canvas: Canvas | null, command: LayerCommand): bool
   const target = canvas?.getActiveObject();
   if (!canvas || !target || !target.isType("image")) return false;
   const objects = canvas.getObjects() as LayerObject[];
-  const next = layerDestination(objects, target, command, object => Boolean(object.isArtboard));
+  const next = layerDestination<LayerObject>(objects, target, command, object => Boolean(object.isArtboard));
   return next >= 0 && next !== objects.indexOf(target);
 }
 
@@ -27,9 +27,10 @@ export function moveMediaLayer(canvas: Canvas | null, command: LayerCommand): vo
   const target = canvas.getActiveObject();
   if (!target) return;
   const objects = canvas.getObjects() as LayerObject[];
-  const next = layerDestination(objects, target, command, object => Boolean(object.isArtboard));
+  const next = layerDestination<LayerObject>(objects, target, command, object => Boolean(object.isArtboard));
+  // The existing undo stack restores saved snapshots: capture the order before changing it.
+  canvas.fire("object:modified", { target });
   canvas.moveObjectTo(target, next);
   objects.filter(object => object.isArtboard).forEach(object => canvas.sendObjectToBack(object));
   canvas.requestRenderAll();
-  canvas.fire("object:modified", { target });
 }
