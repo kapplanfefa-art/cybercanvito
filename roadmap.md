@@ -8,5 +8,5 @@
 - [x] Verificar abertura, posicionamento e fechamento no editor.
 
 # Copiar e colar mídia
-- [ ] Ativar somente Copiar/Colar e Ctrl+C/Ctrl+V para imagens e vídeos.
-- [ ] Testar cópias independentes, repetição e preservação dos demais itens inativos.
+- [x] Ativar somente Copiar/Colar e Ctrl+C/Ctrl+V para imagens e vídeos.
+- [x] Testar cópias independentes, repetição e preservação dos demais itens inativos.

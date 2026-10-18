@@ -109,7 +109,7 @@ export const Canvas = memo(function Canvas() {
           copyMedia(activeCanvas);
           return;
         }
-        if (key === "v") {
+        if (key === "v" && clipboardRef.current.hasContent()) {
           const selected = activeCanvas?.getActiveObject() as (fabric.Object & { isEditing?: boolean }) | undefined;
           if (selected?.isEditing) return;
           e.preventDefault();

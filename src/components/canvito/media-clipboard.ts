@@ -43,7 +43,8 @@ export async function snapshotMedia(source: FabricImage): Promise<MediaSnapshot>
     video.height = video.videoHeight;
     video.currentTime = currentTime;
     const image = new FabricImage(video, { objectCaching: false });
-    image.set({ ...options, ...await util.enlivenObjectEnlivables(options), objectCaching: false });
+    const restored = await util.enlivenObjectEnlivables<Record<string, unknown>>(options);
+    image.set({ ...options, ...restored, objectCaching: false });
     image.controls = { ...controls };
     return image;
   } };
@@ -53,6 +54,7 @@ export function createMediaClipboard(makeSnapshot = snapshotMedia) {
   let snapshot: Promise<MediaSnapshot> | null = null;
   let offset = 0;
   return {
+    hasContent: () => snapshot !== null,
     copy(source: FabricImage) {
       snapshot = makeSnapshot(source);
       // Handle rejection immediately even if the user never pastes.
