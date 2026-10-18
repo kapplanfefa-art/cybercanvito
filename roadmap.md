@@ -18,3 +18,7 @@
 # Excluir mídia pelo menu
 - [x] Ativar Excluir apenas para a imagem ou vídeo selecionado.
 - [x] Verificar remoção e preservação das demais opções.
+
+# Camadas pelo menu de mídia
+- [ ] Ativar submenu com quatro comandos de ordem e Mostrar camadas.
+- [ ] Testar alteração de ordem, preservação do papel e reabertura do menu.
