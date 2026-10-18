@@ -1,4 +1,6 @@
-import { useLayoutEffect, useRef, type ComponentProps } from "react";
+import { useLayoutEffect, useRef, useState, type ComponentProps } from "react";
+import type { Canvas } from "fabric";
+import { MediaLayerMenu } from "./MediaLayerMenu";
 import { createPortal } from "react-dom";
 import {
   Copy, PaintRoller, Clipboard, CopyPlus, Trash2, Layers, AlignStartVertical,
@@ -17,7 +19,7 @@ interface MenuEntry {
   divider?: boolean;
   muted?: boolean;
   premium?: boolean;
-  action?: "copy" | "paste" | "delete";
+  action?: "copy" | "paste" | "delete" | "layers";
 }
 
 const entries: MenuEntry[] = [
@@ -26,7 +28,7 @@ const entries: MenuEntry[] = [
   { label: "Colar", icon: Clipboard, shortcut: "Ctrl+V", action: "paste" },
   { label: "Duplicar", icon: CopyPlus, shortcut: "Ctrl+D" },
   { label: "Excluir", icon: Trash2, shortcut: "DELETE", action: "delete" },
-  { label: "Camada", icon: Layers, submenu: true, divider: true },
+  { label: "Camada", icon: Layers, submenu: true, divider: true, action: "layers" },
   { label: "Alinhar à página", icon: AlignStartVertical, submenu: true },
   { label: "Redimensionar a tela de acordo com a seleção", icon: MoveHorizontal, premium: true, divider: true },
   { label: "Criar componente", icon: Hexagon, shortcut: "Ctrl+Alt+K" },
@@ -50,11 +52,13 @@ export interface MediaContextMenuProps extends ComponentProps<"div"> {
   onPaste: () => void;
   onDelete: () => void;
   canDelete: boolean;
+  canvas: Canvas | null;
 }
 
 /** Only explicitly requested actions are enabled. */
-export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, canDelete, className, ...props }: MediaContextMenuProps) {
+export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, canDelete, canvas, className, ...props }: MediaContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [layerAnchor, setLayerAnchor] = useState<{ x: number; y: number } | null>(null);
   useLayoutEffect(() => {
     const menu = ref.current;
     if (!menu) return;
@@ -64,6 +68,7 @@ export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, can
       menu.style.top = `${Math.max(8, Math.min(y, window.innerHeight - rect.height - 8))}px`;
     };
     position();
+    setLayerAnchor(null);
     menu.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus({ preventScroll: true });
     window.addEventListener("resize", onClose);
     return () => window.removeEventListener("resize", onClose);
@@ -95,7 +100,14 @@ export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, can
             variant="ghost"
             role="menuitem"
             aria-disabled={!action || (action === "delete" && !canDelete)}
-            onClick={action ? () => {
+            aria-haspopup={action === "layers" ? "menu" : undefined}
+            aria-expanded={action === "layers" ? Boolean(layerAnchor) : undefined}
+            onClick={action ? event => {
+              if (action === "layers") {
+                const rect = event.currentTarget.getBoundingClientRect();
+                setLayerAnchor(previous => previous ? null : { x: rect.right + 8, y: rect.top });
+                return;
+              }
               if (action === "delete" && !canDelete) return;
               if (action === "copy") onCopy();
               else if (action === "paste") onPaste();
@@ -112,6 +124,7 @@ export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, can
           </Button>
         </div>
       ))}
+      {layerAnchor && <MediaLayerMenu x={layerAnchor.x} y={layerAnchor.y} canvas={canvas} onClose={onClose} />}
     </div>, document.body,
   );
 }

@@ -425,6 +425,7 @@ const PageBoard = memo(function PageBoard({
 
         {contextMenu?.isMedia && (
           <MediaContextMenu x={contextMenu.clientX} y={contextMenu.clientY} onClose={closeContextMenu}
+            canvas={getPageCanvas(pageId)}
             onCopy={() => onCopyMedia(getPageCanvas(pageId))}
             onPaste={() => onPasteMedia(getPageCanvas(pageId))}
             canDelete={canRemoveMedia(getPageCanvas(pageId)?.getActiveObject())}
