@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import type * as fabric from "fabric";
 import { useEditor, type UploadedFile } from "./editor-context";
 import { MediaContextMenu } from "./MediaContextMenu";
+import { createMediaClipboard } from "./media-clipboard";
 
 /** What was hit on right-click — used to choose menu options. */
 type CtxMenuState = {
@@ -41,6 +42,16 @@ export const Canvas = memo(function Canvas() {
     reorderPage,
   } = useEditor();
   const [isDragging, setIsDragging] = useState(false);
+  const clipboardRef = useRef(createMediaClipboard());
+  const copyMedia = useCallback((canvas: fabric.Canvas | null) => {
+    const source = canvas?.getActiveObject();
+    if (!source?.isType("image")) return;
+    void clipboardRef.current.copy(source as fabric.FabricImage).catch(() => toast.error("Não foi possível copiar a mídia."));
+  }, []);
+  const pasteMedia = useCallback((canvas: fabric.Canvas | null) => {
+    if (!canvas) return;
+    void clipboardRef.current.paste(canvas).catch(() => toast.error("Não foi possível colar a mídia."));
+  }, []);
 
   // ---------- Drag & drop on the entire workspace ----------
   const onDragOver = useCallback((e: React.DragEvent) => {
@@ -92,6 +103,19 @@ export const Canvas = memo(function Canvas() {
       const isInput = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
       
       if ((e.ctrlKey || e.metaKey) && !isInput) {
+        const key = e.key.toLowerCase();
+        if (key === "c" && activeCanvas?.getActiveObject()?.isType("image")) {
+          e.preventDefault();
+          copyMedia(activeCanvas);
+          return;
+        }
+        if (key === "v") {
+          const selected = activeCanvas?.getActiveObject() as (fabric.Object & { isEditing?: boolean }) | undefined;
+          if (selected?.isEditing) return;
+          e.preventDefault();
+          pasteMedia(activeCanvas);
+          return;
+        }
         if (e.key.toLowerCase() === "z") {
           e.preventDefault();
           if (e.shiftKey) redo();
@@ -120,7 +144,7 @@ export const Canvas = memo(function Canvas() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeCanvas, deleteActiveObject, activePageId, pages.length, deletePage, undo, redo]);
+  }, [activeCanvas, deleteActiveObject, activePageId, pages.length, deletePage, undo, redo, copyMedia, pasteMedia]);
 
   return (
     <div 
@@ -149,6 +173,8 @@ export const Canvas = memo(function Canvas() {
               key={page.id}
               pageId={page.id}
               index={idx}
+              onCopyMedia={copyMedia}
+              onPasteMedia={pasteMedia}
             />
           ))}
 
@@ -190,9 +216,13 @@ export const Canvas = memo(function Canvas() {
 const PageBoard = memo(function PageBoard({
   pageId,
   index,
+  onCopyMedia,
+  onPasteMedia,
 }: {
   pageId: string;
   index: number;
+  onCopyMedia: (canvas: fabric.Canvas | null) => void;
+  onPasteMedia: (canvas: fabric.Canvas | null) => void;
 }) {
   const canvasElRef = useRef<HTMLCanvasElement | null>(null);
   const {
@@ -393,7 +423,9 @@ const PageBoard = memo(function PageBoard({
         <PageEmptyCTA pageId={pageId} onAddImage={onAddImage} />
 
         {contextMenu?.isMedia && (
-          <MediaContextMenu x={contextMenu.clientX} y={contextMenu.clientY} onClose={closeContextMenu} />
+          <MediaContextMenu x={contextMenu.clientX} y={contextMenu.clientY} onClose={closeContextMenu}
+            onCopy={() => onCopyMedia(getPageCanvas(pageId))}
+            onPaste={() => onPasteMedia(getPageCanvas(pageId))} />
         )}
         {contextMenu && !contextMenu.isMedia && (
           <div

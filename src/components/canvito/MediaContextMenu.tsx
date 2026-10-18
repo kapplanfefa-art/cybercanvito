@@ -17,12 +17,13 @@ interface MenuEntry {
   divider?: boolean;
   muted?: boolean;
   premium?: boolean;
+  action?: "copy" | "paste";
 }
 
 const entries: MenuEntry[] = [
-  { label: "Copiar", icon: Copy, shortcut: "Ctrl+C" },
+  { label: "Copiar", icon: Copy, shortcut: "Ctrl+C", action: "copy" },
   { label: "Copiar estilo", icon: PaintRoller, submenu: true },
-  { label: "Colar", icon: Clipboard, shortcut: "Ctrl+V" },
+  { label: "Colar", icon: Clipboard, shortcut: "Ctrl+V", action: "paste" },
   { label: "Duplicar", icon: CopyPlus, shortcut: "Ctrl+D" },
   { label: "Excluir", icon: Trash2, shortcut: "DELETE" },
   { label: "Camada", icon: Layers, submenu: true, divider: true },
@@ -45,10 +46,12 @@ export interface MediaContextMenuProps extends ComponentProps<"div"> {
   x: number;
   y: number;
   onClose: () => void;
+  onCopy: () => void;
+  onPaste: () => void;
 }
 
-/** Presentation only: no item mutates, copies, deletes, or calls a service. */
-export function MediaContextMenu({ x, y, onClose, className, ...props }: MediaContextMenuProps) {
+/** Only explicitly requested clipboard actions are enabled. */
+export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, className, ...props }: MediaContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const menu = ref.current;
@@ -84,12 +87,13 @@ export function MediaContextMenu({ x, y, onClose, className, ...props }: MediaCo
         items[next]?.focus();
       }}
     >
-      {entries.map(({ label, icon: Icon, shortcut, submenu, divider, muted, premium }) => (
+      {entries.map(({ label, icon: Icon, shortcut, submenu, divider, muted, premium, action }) => (
         <div key={label} className={cn(divider && "mt-1 border-t border-context-border pt-1")}>
           <Button
             variant="ghost"
             role="menuitem"
-            aria-disabled="true"
+            aria-disabled={!action}
+            onClick={action ? () => { if (action === "copy") onCopy(); else onPaste(); onClose(); } : undefined}
             className={cn("h-[34px] w-full justify-start gap-2.5 rounded px-2 text-left text-sm font-normal text-card-foreground hover:bg-context-hover hover:text-card-foreground focus-visible:bg-context-hover [&_svg]:size-5", muted && "text-context-muted")}
           >
             <Icon aria-hidden="true" />
