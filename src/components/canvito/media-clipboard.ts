@@ -1,4 +1,4 @@
-import { FabricImage, type Canvas } from "fabric";
+import { FabricImage, util, type Canvas } from "fabric";
 
 export interface MediaSnapshot {
   instantiate: () => Promise<FabricImage>;
@@ -42,7 +42,8 @@ export async function snapshotMedia(source: FabricImage): Promise<MediaSnapshot>
     video.width = video.videoWidth;
     video.height = video.videoHeight;
     video.currentTime = currentTime;
-    const image = new FabricImage(video, { ...options, objectCaching: false });
+    const image = new FabricImage(video, { objectCaching: false });
+    image.set({ ...options, ...await util.enlivenObjectEnlivables(options), objectCaching: false });
     image.controls = { ...controls };
     return image;
   } };
