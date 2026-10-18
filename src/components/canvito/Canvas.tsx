@@ -3,6 +3,7 @@ import { ImagePlus, Plus, Trash2, ChevronUp, ChevronDown, Video } from "lucide-r
 import { toast } from "sonner";
 import type * as fabric from "fabric";
 import { useEditor, type UploadedFile } from "./editor-context";
+import { MediaContextMenu } from "./MediaContextMenu";
 
 /** What was hit on right-click — used to choose menu options. */
 type CtxMenuState = {
@@ -11,6 +12,9 @@ type CtxMenuState = {
   y: number;
   /** When true, the click landed on a selected (deletable) object. */
   hasObject: boolean;
+  isMedia: boolean;
+  clientX: number;
+  clientY: number;
   /** Artboard coordinates where an uploaded image should be inserted. */
   insertX: number;
   insertY: number;
@@ -259,10 +263,15 @@ const PageBoard = memo(function PageBoard({
           // fall through to the page background menu
         }
       }
-      if (hitObject) fab.setActiveObject(hitObject);
+      if (hitObject) {
+        fab.setActiveObject(hitObject);
+        fab.requestRenderAll();
+      }
     }
 
-    setContextMenu({ x: localX, y: localY, hasObject: Boolean(hitObject), insertX: ax, insertY: ay });
+    setContextMenu({ x: localX, y: localY, hasObject: Boolean(hitObject),
+      isMedia: hitObject?.isType("image") ?? false, clientX: e.clientX, clientY: e.clientY,
+      insertX: ax, insertY: ay });
   }, [getPageCanvas, pageId, setActivePageId]);
 
   useEffect(() => {
@@ -280,6 +289,8 @@ const PageBoard = memo(function PageBoard({
       window.removeEventListener("keydown", onKey);
     };
   }, [contextMenu]);
+
+  const closeContextMenu = useCallback(() => setContextMenu(null), []);
 
   const pageStyle = useMemo(() => ({
     width: w,
@@ -381,7 +392,10 @@ const PageBoard = memo(function PageBoard({
         )}
         <PageEmptyCTA pageId={pageId} onAddImage={onAddImage} />
 
-        {contextMenu && (
+        {contextMenu?.isMedia && (
+          <MediaContextMenu x={contextMenu.clientX} y={contextMenu.clientY} onClose={closeContextMenu} />
+        )}
+        {contextMenu && !contextMenu.isMedia && (
           <div
             style={{ left: contextMenu.x, top: contextMenu.y, position: "absolute" }}
             onMouseDown={(e) => e.stopPropagation()}
