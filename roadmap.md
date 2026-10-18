@@ -4,5 +4,5 @@
 - [x] Testar regras e verificar o fluxo no editor.
 
 # Menu de imagens e vídeos
-- [ ] Criar o menu da referência ao clicar com o botão direito em imagens e vídeos no papel, sem executar ações.
-- [ ] Verificar abertura, posicionamento e fechamento no editor.
+- [x] Criar o menu da referência ao clicar com o botão direito em imagens e vídeos no papel, sem executar ações.
+- [x] Verificar abertura, posicionamento e fechamento no editor.
