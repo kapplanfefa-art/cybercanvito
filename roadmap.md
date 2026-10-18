@@ -16,5 +16,5 @@
 - [x] Verificar reabertura na área em branco após Copiar e Colar.
 
 # Excluir mídia pelo menu
-- [ ] Ativar Excluir apenas para a imagem ou vídeo selecionado.
-- [ ] Verificar remoção e preservação das demais opções.
+- [x] Ativar Excluir apenas para a imagem ou vídeo selecionado.
+- [x] Verificar remoção e preservação das demais opções.
