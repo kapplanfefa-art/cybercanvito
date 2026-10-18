@@ -20,5 +20,5 @@
 - [x] Verificar remoção e preservação das demais opções.
 
 # Camadas pelo menu de mídia
-- [ ] Ativar submenu com quatro comandos de ordem e Mostrar camadas.
-- [ ] Testar alteração de ordem, preservação do papel e reabertura do menu.
+- [x] Ativar submenu com quatro comandos de ordem e Mostrar camadas.
+- [x] Testar alteração de ordem, preservação do papel e reabertura do menu.
