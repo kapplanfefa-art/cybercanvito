@@ -2,3 +2,7 @@
 - [x] Corrigir preservação do trecho selecionado e aplicação à caixa inteira sem seleção.
 - [x] Corrigir leitura e alteração do tamanho de fonte.
 - [x] Testar regras e verificar o fluxo no editor.
+
+# Menu de imagens e vídeos
+- [x] Criar o menu da referência ao clicar com o botão direito em imagens e vídeos no papel, sem executar ações.
+- [x] Verificar abertura, posicionamento e fechamento no editor.

@@ -34,6 +34,9 @@
   --color-canvas-bg: var(--canvas-bg);
   --color-panel: var(--panel);
   --color-panel-foreground: var(--panel-foreground);
+  --color-context-border: var(--context-border);
+  --color-context-hover: var(--context-hover);
+  --color-context-muted: var(--context-muted);
 }
 
 :root {
@@ -57,6 +60,10 @@
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.18 0.04 280);
+  --context-border: oklch(0.88 0.01 270);
+  --context-hover: oklch(0.965 0.003 270);
+  --context-muted: oklch(0.64 0.015 270);
+  --shadow-context-menu: 0 8px 32px oklch(0.18 0.02 270 / 0.22);
   --popover: oklch(0.22 0.06 285);
   --popover-foreground: oklch(0.98 0.01 280);
 
@@ -110,6 +117,9 @@
 }
 
 @layer utilities {
+  .media-context-menu {
+    box-shadow: var(--shadow-context-menu);
+  }
   .bg-cyber-gradient {
     background: var(--gradient-cyber);
   }
