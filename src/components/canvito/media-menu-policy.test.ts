@@ -1,7 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { pageHasMedia } from "./media-menu-policy";
+import { canRemoveMedia, pageHasMedia } from "./media-menu-policy";
 
 const object = (type: string, isArtboard = false) => ({ isArtboard, isType: (expected: string) => type === expected });
+
+describe("media removal scope", () => {
+  it("allows removing selected images and video-backed images", () => {
+    expect(canRemoveMedia(object("image"))).toBe(true);
+  });
+  it("never removes the page, text, or an absent selection", () => {
+    expect(canRemoveMedia(null)).toBe(false);
+    expect(canRemoveMedia(object("image", true))).toBe(false);
+    expect(canRemoveMedia(object("text"))).toBe(false);
+  });
+});
 
 describe("page media menu scope", () => {
   it("opens anywhere on a page containing an image, regardless of the clicked target", () => {

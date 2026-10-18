@@ -14,3 +14,7 @@
 # Reabertura do menu no papel
 - [x] Abrir o mesmo menu em qualquer área do papel que contenha imagem ou vídeo.
 - [x] Verificar reabertura na área em branco após Copiar e Colar.
+
+# Excluir mídia pelo menu
+- [x] Ativar Excluir apenas para a imagem ou vídeo selecionado.
+- [x] Verificar remoção e preservação das demais opções.
