@@ -5,6 +5,7 @@ import type * as fabric from "fabric";
 import { useEditor, type UploadedFile } from "./editor-context";
 import { MediaContextMenu } from "./MediaContextMenu";
 import { createMediaClipboard } from "./media-clipboard";
+import { pageHasMedia } from "./media-menu-policy";
 
 /** What was hit on right-click — used to choose menu options. */
 type CtxMenuState = {
@@ -300,7 +301,7 @@ const PageBoard = memo(function PageBoard({
     }
 
     setContextMenu({ x: localX, y: localY, hasObject: Boolean(hitObject),
-      isMedia: hitObject?.isType("image") ?? false, clientX: e.clientX, clientY: e.clientY,
+      isMedia: pageHasMedia(fab?.getObjects() ?? []), clientX: e.clientX, clientY: e.clientY,
       insertX: ax, insertY: ay });
   }, [getPageCanvas, pageId, setActivePageId]);
 

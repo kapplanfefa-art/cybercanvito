@@ -10,3 +10,7 @@
 # Copiar e colar mídia
 - [x] Ativar somente Copiar/Colar e Ctrl+C/Ctrl+V para imagens e vídeos.
 - [x] Testar cópias independentes, repetição e preservação dos demais itens inativos.
+
+# Reabertura do menu no papel
+- [x] Abrir o mesmo menu em qualquer área do papel que contenha imagem ou vídeo.
+- [x] Verificar reabertura na área em branco após Copiar e Colar.
