@@ -34,3 +34,7 @@
 # Reconexão do menu de mídia
 - [x] Renderizar o menu existente em qualquer área do papel com imagem ou vídeo, preservando os comandos já ativados.
 - [x] Verificar imagem, vídeo, área em branco e reabertura no editor; executar regressões.
+
+# Aparência da cópia e atalhos
+- [x] Preservar os controles originais roxos ao colar, sem alterar o tamanho da mídia.
+- [x] Garantir Ctrl+C/Ctrl+V sem interferir na edição de texto e verificar no editor.
