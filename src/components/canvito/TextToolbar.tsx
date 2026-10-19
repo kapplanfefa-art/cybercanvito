@@ -174,7 +174,7 @@ export const TextToolbar = memo(function TextToolbar() {
           title="Cor do texto"
         >
           <span className="text-[11px] font-bold leading-none">A</span>
-          <span className="mt-0.5 h-[3px] w-4 rounded-sm" style={{ background: typeof fill === "string" ? fill : "#fff" }} />
+          <span className="mt-0.5 h-[3px] w-4 rounded-sm" style={{ background: "linear-gradient(90deg, #ff3b30, #ff9500, #ffcc00, #34c759, #00c7be, #007aff, #af52de)" }} />
         </Button>
         {colorOpen && (
           <div className="absolute left-0 top-9 z-50 rounded-lg border border-[var(--neon-violet)]/40 bg-[oklch(0.18_0.04_280)]/95 p-2 shadow-[0_10px_30px_oklch(0.55_0.28_295/0.35)] backdrop-blur-md">
