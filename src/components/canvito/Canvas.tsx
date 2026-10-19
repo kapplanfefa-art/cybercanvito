@@ -241,6 +241,7 @@ const PageBoard = memo(function PageBoard({
     activePageId,
     openImagePicker,
     deletePage,
+    getPageCanvas,
     pages,
     reorderPage,
     isMagicBrushActive,
