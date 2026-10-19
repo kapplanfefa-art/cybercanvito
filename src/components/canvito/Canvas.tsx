@@ -1,5 +1,9 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { ImagePlus, Plus, Trash2, ChevronUp, ChevronDown, Video } from "lucide-react";
+import {
+  ImagePlus, Plus, Trash2, ChevronUp, ChevronDown, Video, Copy, Paintbrush,
+  Clipboard, CopyPlus, FilePlus2, MessageCircle, MoveHorizontal, Hash,
+  ChevronRight, Crown,
+} from "lucide-react";
 import { toast } from "sonner";
 import type * as fabric from "fabric";
 import { useEditor, type UploadedFile } from "./editor-context";
@@ -438,39 +442,49 @@ const PageBoard = memo(function PageBoard({
             style={{ left: contextMenu.x, top: contextMenu.y, position: "absolute" }}
             onMouseDown={(e) => e.stopPropagation()}
             onContextMenu={(e) => e.preventDefault()}
-            className="z-50 min-w-[200px] overflow-hidden rounded-lg border border-[var(--neon-violet)]/40 bg-[oklch(0.18_0.03_280)]/95 shadow-[0_10px_30px_oklch(0.55_0.28_295/0.35),0_0_0_1px_oklch(0.55_0.28_295/0.15)] backdrop-blur-md"
+            className={
+              "z-50 overflow-hidden rounded-2xl border border-border bg-card p-1.5 text-card-foreground shadow-lg " +
+              (contextMenu.hasObject ? "min-w-[200px]" : "w-[284px] max-w-[calc(100vw-16px)]")
+            }
           >
             {contextMenu.hasObject ? (
-              <button
-                type="button"
-                onClick={onDeleteObjectFromMenu}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium text-[oklch(0.85_0.18_25)] transition-colors hover:bg-[oklch(0.5_0.22_25)]/20 hover:text-[oklch(0.92_0.2_25)]"
+              <div
+                role="menuitem"
+                className="flex h-9 items-center gap-2 rounded-lg px-2 text-sm font-medium text-destructive"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="size-5" />
                 Deletar Imagem
-              </button>
+              </div>
             ) : (
               <>
-                <button
-                  type="button"
-                  disabled={false}
-                  onClick={onAddImageFromMenu}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium text-[oklch(0.95_0.01_280)] transition-colors hover:bg-[var(--neon-violet)]/20 hover:text-[var(--neon-violet)]"
-                >
-                  <ImagePlus className="h-4 w-4 text-[var(--neon-violet)]" />
-                  Adicionar Imagem
-                </button>
-                <div className="h-px bg-[var(--neon-violet)]/20" />
-                <button
-                  type="button"
-                  disabled={!canDelete}
-                  onClick={onDeletePageFromMenu}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium text-[oklch(0.85_0.18_25)] transition-colors hover:bg-[oklch(0.5_0.22_25)]/20 hover:text-[oklch(0.92_0.2_25)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
-                  title={canDelete ? "Deletar esta página" : "Não é possível excluir a única página"}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Deletar Página
-                </button>
+                {[
+                  { label: "Copiar", icon: Copy, shortcut: "Ctrl+C" },
+                  { label: "Copiar estilo da página", icon: Paintbrush, premium: true },
+                  { label: "Colar", icon: Clipboard, shortcut: "Ctrl+V" },
+                  { label: "Duplicar página", icon: CopyPlus, shortcut: "Ctrl+D" },
+                  { label: "Adicionar página", icon: FilePlus2, shortcut: "Ctrl+Enter", divider: true },
+                  { label: "Comentar", icon: MessageCircle, shortcut: "Ctrl+Alt+N", divider: true },
+                  { label: "Redimensionar página", icon: MoveHorizontal, premium: true, divider: true },
+                  { label: "Guias", icon: Hash, submenu: true },
+                  { label: "Editar como vídeo", icon: Video },
+                ].map(({ label, icon: Icon, shortcut, premium, submenu, divider }) => (
+                  <div key={label} className={divider ? "mt-1 border-t border-border pt-1" : undefined}>
+                    <div
+                      role="menuitem"
+                      className="flex min-h-9 items-center gap-2 rounded-lg px-2 text-sm"
+                    >
+                      <Icon aria-hidden="true" className="size-5 shrink-0" />
+                      <span className="min-w-0 flex-1">{label}</span>
+                      {shortcut && (
+                        <span className="shrink-0 rounded-md bg-muted px-2 py-1 text-[11px] leading-none text-muted-foreground">
+                          {shortcut}
+                        </span>
+                      )}
+                      {premium && <Crown aria-hidden="true" className="size-3 shrink-0 text-muted-foreground" />}
+                      {submenu && <ChevronRight aria-hidden="true" className="size-4 shrink-0" />}
+                    </div>
+                  </div>
+                ))}
               </>
             )}
           </div>
