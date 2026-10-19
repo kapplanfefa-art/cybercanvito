@@ -30,3 +30,7 @@
 # Ícone de cor do texto
 - [x] Corrigir a faixa arco-íris abaixo do A, preservando o fundo do editor.
 - [x] Verificar o ícone visível e a abertura do seletor no editor.
+
+# Reconexão do menu de mídia
+- [x] Renderizar o menu existente em qualquer área do papel com imagem ou vídeo, preservando os comandos já ativados.
+- [x] Verificar imagem, vídeo, área em branco e reabertura no editor; executar regressões.

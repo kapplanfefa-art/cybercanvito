@@ -44,4 +44,18 @@ describe("page context menu choice", () => {
   it("shows the media menu as soon as the paper holds an image or video", () => {
     expect(pageContextMenu([object("rect", true), object("image")])).toBe("media");
   });
+  it("uses only the clicked paper's contents, not media on another paper", () => {
+    const mediaPage = [object("rect", true), object("image")];
+    const emptyPage = [object("rect", true)];
+    expect(pageContextMenu(mediaPage)).toBe("media");
+    expect(pageContextMenu(emptyPage)).toBe("page");
+  });
+  it("returns the media menu on every reopening until the last media is removed", () => {
+    const paper = [object("rect", true), object("image")];
+    for (let reopening = 0; reopening < 3; reopening += 1) {
+      expect(pageContextMenu(paper)).toBe("media");
+    }
+    paper.pop();
+    expect(pageContextMenu(paper)).toBe("page");
+  });
 });
