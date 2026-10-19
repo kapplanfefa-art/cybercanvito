@@ -246,6 +246,45 @@ const PageBoard = memo(function PageBoard({
     isMagicBrushActive,
   } = useEditor();
   const canDelete = pages.length > 1;
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; kind: "media" | "page" } | null>(null);
+
+  const onContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActivePageId(pageId);
+    const fab = getPageCanvas(pageId);
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      kind: pageContextMenuKind(fab?.getObjects() ?? []),
+    });
+  }, [getPageCanvas, pageId, setActivePageId]);
+
+  useEffect(() => {
+    if (!contextMenu) return;
+    const close = () => setContextMenu(null);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setContextMenu(null); };
+    window.addEventListener("mousedown", close);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousedown", close);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [contextMenu]);
+
+  useLayoutEffect(() => {
+    if (!contextMenu) return;
+    const menu = document.querySelector<HTMLElement>('[role="menu"][aria-label="Menu da página"]');
+    if (!menu) return;
+    const rect = menu.getBoundingClientRect();
+    menu.style.left = `${Math.max(8, Math.min(contextMenu.x, window.innerWidth - rect.width - 8))}px`;
+    menu.style.top = `${Math.max(8, Math.min(contextMenu.y, window.innerHeight - rect.height - 8))}px`;
+  }, [contextMenu]);
+
+  const closeContextMenu = useCallback(() => setContextMenu(null), []);
+
 
   const { w, h } = useMemo(() => {
     const nextScale = zoom / 100;
