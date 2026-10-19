@@ -80,7 +80,7 @@ export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, can
       ref={ref}
       role="menu"
       aria-label="Menu de imagem ou vídeo"
-      className={cn("media-context-menu fixed z-[100] max-h-[calc(100dvh-16px)] w-[428px] max-w-[calc(100vw-16px)] overflow-y-auto rounded-lg border border-context-border bg-card p-1.5 text-card-foreground", className)}
+      className={cn("media-context-menu fixed z-[100] max-h-[calc(100dvh-16px)] w-[428px] max-w-[calc(100vw-16px)] overflow-y-auto rounded-2xl border border-border bg-card p-1.5 text-card-foreground shadow-lg", className)}
       onMouseDown={event => event.stopPropagation()}
       onContextMenu={event => { event.preventDefault(); event.stopPropagation(); }}
       onKeyDown={event => {
@@ -95,7 +95,7 @@ export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, can
       }}
     >
       {entries.map(({ label, icon: Icon, shortcut, submenu, divider, muted, premium, action }) => (
-        <div key={label} className={cn(divider && "mt-1 border-t border-context-border pt-1")}>
+        <div key={label} className={cn(divider && "mt-1 border-t border-border pt-1")}>
           <Button
             variant="ghost"
             role="menuitem"
@@ -114,11 +114,11 @@ export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, can
               else onDelete();
               onClose();
             } : undefined}
-            className={cn("h-[34px] w-full justify-start gap-2.5 rounded px-2 text-left text-sm font-normal text-card-foreground hover:bg-context-hover hover:text-card-foreground focus-visible:bg-context-hover [&_svg]:size-5", muted && "text-context-muted")}
+            className={cn("h-9 w-full justify-start gap-2 rounded-lg px-2 text-left text-sm font-normal text-card-foreground hover:bg-muted hover:text-card-foreground focus-visible:bg-muted [&_svg]:size-5", muted && "text-context-muted")}
           >
             <Icon aria-hidden="true" />
             <span className="min-w-0 flex-1 whitespace-normal leading-tight">{label}</span>
-            {shortcut && <span className="shrink-0 rounded bg-context-hover px-2 py-1 text-[11px] leading-none">{shortcut}</span>}
+            {shortcut && <span className="shrink-0 rounded-md bg-muted px-2 py-1 text-[11px] leading-none text-muted-foreground">{shortcut}</span>}
             {submenu && <ChevronRight aria-hidden="true" className="!size-4" />}
             {premium && <Crown aria-hidden="true" className="!size-3 text-context-muted" />}
           </Button>
