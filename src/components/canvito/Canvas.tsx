@@ -1,31 +1,10 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import {
-  ImagePlus, Plus, Trash2, ChevronUp, ChevronDown, Video, Copy, Paintbrush,
-  Clipboard, CopyPlus, FilePlus2, MessageCircle, MoveHorizontal, Hash,
-  ChevronRight, Crown,
-} from "lucide-react";
+import { ImagePlus, Plus, Trash2, ChevronUp, ChevronDown, Video } from "lucide-react";
 import { toast } from "sonner";
 import type * as fabric from "fabric";
 import { useEditor, type UploadedFile } from "./editor-context";
-import { MediaContextMenu } from "./MediaContextMenu";
 import { createMediaClipboard } from "./media-clipboard";
-import { canRemoveMedia, pageHasMedia } from "./media-menu-policy";
-
-/** What was hit on right-click — used to choose menu options. */
-type CtxMenuState = {
-  /** Position relative to the page paper. */
-  x: number;
-  y: number;
-  /** When true, the click landed on a selected (deletable) object. */
-  hasObject: boolean;
-  isMedia: boolean;
-  clientX: number;
-  clientY: number;
-  /** Artboard coordinates where an uploaded image should be inserted. */
-  insertX: number;
-  insertY: number;
-};
 
 /**
  * The Workspace = a single scrollable gray container. Pages stack vertically,
@@ -204,8 +183,6 @@ export const Canvas = memo(function Canvas() {
               key={page.id}
               pageId={page.id}
               index={idx}
-              onCopyMedia={copyMedia}
-              onPasteMedia={pasteMedia}
             />
           ))}
 
@@ -248,13 +225,9 @@ export const Canvas = memo(function Canvas() {
 const PageBoard = memo(function PageBoard({
   pageId,
   index,
-  onCopyMedia,
-  onPasteMedia,
 }: {
   pageId: string;
   index: number;
-  onCopyMedia: (canvas: fabric.Canvas | null) => void;
-  onPasteMedia: (canvas: fabric.Canvas | null) => void;
 }) {
   const canvasElRef = useRef<HTMLCanvasElement | null>(null);
   const {
@@ -265,15 +238,11 @@ const PageBoard = memo(function PageBoard({
     activePageId,
     openImagePicker,
     deletePage,
-    deleteActiveObject,
-    getPageCanvas,
     pages,
     reorderPage,
     isMagicBrushActive,
   } = useEditor();
   const canDelete = pages.length > 1;
-  const [contextMenu, setContextMenu] = useState<CtxMenuState | null>(null);
-  const emptyContextMenuRef = useRef<HTMLDivElement | null>(null);
 
   const { w, h } = useMemo(() => {
     const nextScale = zoom / 100;
@@ -297,72 +266,7 @@ const PageBoard = memo(function PageBoard({
     openImagePicker(x === undefined || y === undefined ? { pageId } : { pageId, x, y });
   }, [openImagePicker, pageId, setActivePageId]);
 
-  const onContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setActivePageId(pageId);
 
-    const pageEl = e.currentTarget;
-    const rect = pageEl.getBoundingClientRect();
-    const fab = getPageCanvas(pageId);
-    const z = fab?.getZoom() ?? 1;
-    const localX = e.clientX - rect.left;
-    const localY = e.clientY - rect.top;
-    const ax = localX / z;
-    const ay = localY / z;
-
-    let hitObject: fabric.Object | null = null;
-    if (fab) {
-      const objs = fab.getObjects();
-      for (let i = objs.length - 1; i >= 0; i--) {
-        const obj = objs[i] as fabric.Object & { isArtboard?: boolean };
-        if (obj.isArtboard) continue;
-        try {
-          if (obj.containsPoint({ x: ax, y: ay } as fabric.Point)) {
-            hitObject = obj;
-            break;
-          }
-        } catch {
-          // fall through to the page background menu
-        }
-      }
-      if (hitObject) {
-        fab.setActiveObject(hitObject);
-        fab.requestRenderAll();
-      }
-    }
-
-    setContextMenu({ x: localX, y: localY, hasObject: Boolean(hitObject),
-      isMedia: pageHasMedia(fab?.getObjects() ?? []), clientX: e.clientX, clientY: e.clientY,
-      insertX: ax, insertY: ay });
-  }, [getPageCanvas, pageId, setActivePageId]);
-
-  useEffect(() => {
-    if (!contextMenu) return;
-    const close = () => setContextMenu(null);
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setContextMenu(null);
-    };
-    window.addEventListener("mousedown", close);
-    window.addEventListener("scroll", close, true);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("mousedown", close);
-      window.removeEventListener("scroll", close, true);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [contextMenu]);
-
-  useLayoutEffect(() => {
-    if (!contextMenu || contextMenu.isMedia) return;
-    const menu = emptyContextMenuRef.current;
-    if (!menu) return;
-    const rect = menu.getBoundingClientRect();
-    menu.style.left = `${Math.max(8, Math.min(contextMenu.clientX, window.innerWidth - rect.width - 8))}px`;
-    menu.style.top = `${Math.max(8, Math.min(contextMenu.clientY, window.innerHeight - rect.height - 8))}px`;
-  }, [contextMenu]);
-
-  const closeContextMenu = useCallback(() => setContextMenu(null), []);
 
   const pageStyle = useMemo(() => ({
     width: w,
@@ -379,19 +283,6 @@ const PageBoard = memo(function PageBoard({
   }, []);
   const onDeletePageClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    if (canDelete) deletePage(pageId);
-  }, [canDelete, deletePage, pageId]);
-  const onDeleteObjectFromMenu = useCallback(() => {
-    deleteActiveObject();
-    setContextMenu(null);
-  }, [deleteActiveObject]);
-  const onAddImageFromMenu = useCallback(() => {
-    if (!contextMenu) return;
-    onAddImage(contextMenu.insertX, contextMenu.insertY);
-    setContextMenu(null);
-  }, [contextMenu, onAddImage]);
-  const onDeletePageFromMenu = useCallback(() => {
-    setContextMenu(null);
     if (canDelete) deletePage(pageId);
   }, [canDelete, deletePage, pageId]);
 
@@ -448,7 +339,6 @@ const PageBoard = memo(function PageBoard({
       <div
         id={isActive ? "canvas-workspace" : undefined}
         data-page-id={pageId}
-        onContextMenu={onContextMenu}
         className={
           "relative bg-white transition-shadow " +
           (isActive
@@ -463,70 +353,6 @@ const PageBoard = memo(function PageBoard({
           <OverlayPaintCanvas pageId={pageId} width={w} height={h} />
         )}
         <PageEmptyCTA pageId={pageId} onAddImage={onAddImage} />
-
-        {contextMenu?.isMedia && (
-          <MediaContextMenu x={contextMenu.clientX} y={contextMenu.clientY} onClose={closeContextMenu}
-            canvas={getPageCanvas(pageId)}
-            onCopy={() => onCopyMedia(getPageCanvas(pageId))}
-            onPaste={() => onPasteMedia(getPageCanvas(pageId))}
-            canDelete={canRemoveMedia(getPageCanvas(pageId)?.getActiveObject())}
-            onDelete={() => {
-              if (canRemoveMedia(getPageCanvas(pageId)?.getActiveObject())) onDeleteObjectFromMenu();
-            }} />
-        )}
-        {contextMenu && !contextMenu.isMedia && createPortal(
-          <div
-            ref={emptyContextMenuRef}
-            style={{ left: contextMenu.clientX, top: contextMenu.clientY, position: "fixed" }}
-            onMouseDown={(e) => e.stopPropagation()}
-            onContextMenu={(e) => e.preventDefault()}
-            className={
-              "z-[100] overflow-hidden rounded-2xl border border-border bg-card p-1.5 text-card-foreground shadow-lg " +
-              (contextMenu.hasObject ? "min-w-[200px]" : "w-[284px] max-w-[calc(100vw-16px)]")
-            }
-          >
-            {contextMenu.hasObject ? (
-              <div
-                role="menuitem"
-                className="flex h-9 items-center gap-2 rounded-lg px-2 text-sm font-medium text-destructive"
-              >
-                <Trash2 className="size-5" />
-                Deletar Imagem
-              </div>
-            ) : (
-              <>
-                {[
-                  { label: "Copiar", icon: Copy, shortcut: "Ctrl+C" },
-                  { label: "Copiar estilo da página", icon: Paintbrush, premium: true },
-                  { label: "Colar", icon: Clipboard, shortcut: "Ctrl+V" },
-                  { label: "Duplicar página", icon: CopyPlus, shortcut: "Ctrl+D" },
-                  { label: "Adicionar página", icon: FilePlus2, shortcut: "Ctrl+Enter", divider: true },
-                  { label: "Comentar", icon: MessageCircle, shortcut: "Ctrl+Alt+N", divider: true },
-                  { label: "Redimensionar página", icon: MoveHorizontal, premium: true, divider: true },
-                  { label: "Guias", icon: Hash, submenu: true },
-                  { label: "Editar como vídeo", icon: Video },
-                ].map(({ label, icon: Icon, shortcut, premium, submenu, divider }) => (
-                  <div key={label} className={divider ? "mt-1 border-t border-border pt-1" : undefined}>
-                    <div
-                      role="menuitem"
-                      className="flex min-h-9 items-center gap-2 rounded-lg px-2 text-sm"
-                    >
-                      <Icon aria-hidden="true" className="size-5 shrink-0" />
-                      <span className="min-w-0 flex-1">{label}</span>
-                      {shortcut && (
-                        <span className="shrink-0 rounded-md bg-muted px-2 py-1 text-[11px] leading-none text-muted-foreground">
-                          {shortcut}
-                        </span>
-                      )}
-                      {premium && <Crown aria-hidden="true" className="size-3 shrink-0 text-muted-foreground" />}
-                      {submenu && <ChevronRight aria-hidden="true" className="size-4 shrink-0" />}
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
