@@ -48,14 +48,39 @@ export const Canvas = memo(function Canvas() {
   } = useEditor();
   const [isDragging, setIsDragging] = useState(false);
   const clipboardRef = useRef(createMediaClipboard());
+  const objectClipboardRef = useRef<fabric.Object | null>(null);
+  const clipboardKindRef = useRef<"media" | "object" | null>(null);
   const copyMedia = useCallback((canvas: fabric.Canvas | null) => {
     const source = canvas?.getActiveObject();
-    if (!source?.isType("image")) return;
-    void clipboardRef.current.copy(source as fabric.FabricImage).catch(() => toast.error("Não foi possível copiar a mídia."));
+    if (!source) return;
+    if (source.isType("image")) {
+      clipboardKindRef.current = "media";
+      void clipboardRef.current.copy(source as fabric.FabricImage).catch(() => toast.error("Não foi possível copiar a mídia."));
+      return;
+    }
+    clipboardKindRef.current = "object";
+    void source.clone().then((copy) => {
+      objectClipboardRef.current = copy;
+    }).catch(() => toast.error("Não foi possível copiar o elemento."));
   }, []);
   const pasteMedia = useCallback((canvas: fabric.Canvas | null) => {
     if (!canvas) return;
-    void clipboardRef.current.paste(canvas).catch(() => toast.error("Não foi possível colar a mídia."));
+    if (clipboardKindRef.current === "media") {
+      void clipboardRef.current.paste(canvas).catch(() => toast.error("Não foi possível colar a mídia."));
+      return;
+    }
+    const copiedObject = objectClipboardRef.current;
+    if (!copiedObject || clipboardKindRef.current !== "object") return;
+    void copiedObject.clone().then((copy) => {
+      if (canvas.disposed || canvas.destroyed) return;
+      copy.set({
+        left: (copy.left ?? 0) + 20,
+        top: (copy.top ?? 0) + 20,
+      });
+      canvas.add(copy);
+      canvas.setActiveObject(copy);
+      canvas.requestRenderAll();
+    }).catch(() => toast.error("Não foi possível colar o elemento."));
   }, []);
 
   // ---------- Drag & drop on the entire workspace ----------
@@ -109,12 +134,12 @@ export const Canvas = memo(function Canvas() {
       
       if ((e.ctrlKey || e.metaKey) && !isInput) {
         const key = e.key.toLowerCase();
-        if (key === "c" && activeCanvas?.getActiveObject()?.isType("image")) {
+        if (key === "c" && activeCanvas?.getActiveObject()) {
           e.preventDefault();
           copyMedia(activeCanvas);
           return;
         }
-        if (key === "v" && clipboardRef.current.hasContent()) {
+        if (key === "v" && clipboardKindRef.current !== null) {
           const selected = activeCanvas?.getActiveObject() as (fabric.Object & { isEditing?: boolean }) | undefined;
           if (selected?.isEditing) return;
           e.preventDefault();
