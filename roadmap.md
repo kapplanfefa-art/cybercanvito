@@ -38,3 +38,7 @@
 # Aparência da cópia e atalhos
 - [x] Preservar os controles originais roxos ao colar, sem alterar o tamanho da mídia.
 - [x] Garantir Ctrl+C/Ctrl+V sem interferir na edição de texto e verificar no editor.
+
+# Exclusão pelo mouse e teclado
+- [ ] Garantir Excluir pelo menu e Delete no elemento selecionado, sem apagar o papel ou interferir na digitação.
+- [ ] Testar exclusão de imagens e vídeos pelo menu e pelo teclado.
