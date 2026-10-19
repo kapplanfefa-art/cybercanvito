@@ -274,16 +274,8 @@ const PageBoard = memo(function PageBoard({
     };
   }, [contextMenu]);
 
-  useLayoutEffect(() => {
-    if (!contextMenu) return;
-    const menu = document.querySelector<HTMLElement>('[role="menu"][aria-label="Menu da página"]');
-    if (!menu) return;
-    const rect = menu.getBoundingClientRect();
-    menu.style.left = `${Math.max(8, Math.min(contextMenu.x, window.innerWidth - rect.width - 8))}px`;
-    menu.style.top = `${Math.max(8, Math.min(contextMenu.y, window.innerHeight - rect.height - 8))}px`;
-  }, [contextMenu]);
-
   const closeContextMenu = useCallback(() => setContextMenu(null), []);
+
 
 
   const { w, h } = useMemo(() => {
