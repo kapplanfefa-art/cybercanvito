@@ -1,4 +1,5 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import {
   ImagePlus, Plus, Trash2, ChevronUp, ChevronDown, Video, Copy, Paintbrush,
   Clipboard, CopyPlus, FilePlus2, MessageCircle, MoveHorizontal, Hash,
@@ -235,7 +236,8 @@ export const Canvas = memo(function Canvas() {
             <div className="rounded-xl bg-white/90 px-5 py-3 text-sm font-semibold text-[oklch(0.55_0.28_295)] shadow-xl shadow-black/10">
               Solte a imagem para inserir no papel ativo
             </div>
-          </div>
+          </div>,
+          document.body,
         )}
       </div>
     </div>
@@ -271,6 +273,7 @@ const PageBoard = memo(function PageBoard({
   } = useEditor();
   const canDelete = pages.length > 1;
   const [contextMenu, setContextMenu] = useState<CtxMenuState | null>(null);
+  const emptyContextMenuRef = useRef<HTMLDivElement | null>(null);
 
   const { w, h } = useMemo(() => {
     const nextScale = zoom / 100;
@@ -348,6 +351,15 @@ const PageBoard = memo(function PageBoard({
       window.removeEventListener("scroll", close, true);
       window.removeEventListener("keydown", onKey);
     };
+  }, [contextMenu]);
+
+  useLayoutEffect(() => {
+    if (!contextMenu || contextMenu.isMedia) return;
+    const menu = emptyContextMenuRef.current;
+    if (!menu) return;
+    const rect = menu.getBoundingClientRect();
+    menu.style.left = `${Math.max(8, Math.min(contextMenu.clientX, window.innerWidth - rect.width - 8))}px`;
+    menu.style.top = `${Math.max(8, Math.min(contextMenu.clientY, window.innerHeight - rect.height - 8))}px`;
   }, [contextMenu]);
 
   const closeContextMenu = useCallback(() => setContextMenu(null), []);
@@ -462,13 +474,14 @@ const PageBoard = memo(function PageBoard({
               if (canRemoveMedia(getPageCanvas(pageId)?.getActiveObject())) onDeleteObjectFromMenu();
             }} />
         )}
-        {contextMenu && !contextMenu.isMedia && (
+        {contextMenu && !contextMenu.isMedia && createPortal(
           <div
-            style={{ left: contextMenu.x, top: contextMenu.y, position: "absolute" }}
+            ref={emptyContextMenuRef}
+            style={{ left: contextMenu.clientX, top: contextMenu.clientY, position: "fixed" }}
             onMouseDown={(e) => e.stopPropagation()}
             onContextMenu={(e) => e.preventDefault()}
             className={
-              "z-50 overflow-hidden rounded-2xl border border-border bg-card p-1.5 text-card-foreground shadow-lg " +
+              "z-[100] overflow-hidden rounded-2xl border border-border bg-card p-1.5 text-card-foreground shadow-lg " +
               (contextMenu.hasObject ? "min-w-[200px]" : "w-[284px] max-w-[calc(100vw-16px)]")
             }
           >
