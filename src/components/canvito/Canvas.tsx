@@ -7,7 +7,7 @@ import { useEditor, type UploadedFile } from "./editor-context";
 import { createMediaClipboard } from "./media-clipboard";
 import { MediaContextMenu } from "./MediaContextMenu";
 import { PageContextMenu } from "./PageContextMenu";
-import { pageContextMenu as pageContextMenuKind } from "./media-menu-policy";
+import { canRemoveMedia, pageContextMenu as pageContextMenuKind } from "./media-menu-policy";
 
 /**
  * The Workspace = a single scrollable gray container. Pages stack vertically,
@@ -186,6 +186,9 @@ export const Canvas = memo(function Canvas() {
               key={page.id}
               pageId={page.id}
               index={idx}
+              onCopy={copyMedia}
+              onPaste={pasteMedia}
+              onDelete={deleteActiveObject}
             />
           ))}
 
@@ -228,9 +231,15 @@ export const Canvas = memo(function Canvas() {
 const PageBoard = memo(function PageBoard({
   pageId,
   index,
+  onCopy,
+  onPaste,
+  onDelete,
 }: {
   pageId: string;
   index: number;
+  onCopy: (canvas: fabric.Canvas | null) => void;
+  onPaste: (canvas: fabric.Canvas | null) => void;
+  onDelete: () => void;
 }) {
   const canvasElRef = useRef<HTMLCanvasElement | null>(null);
   const {
@@ -389,6 +398,20 @@ const PageBoard = memo(function PageBoard({
           <OverlayPaintCanvas pageId={pageId} width={w} height={h} />
         )}
         <PageEmptyCTA pageId={pageId} onAddImage={onAddImage} />
+        {contextMenu?.kind === "media" && (
+          <MediaContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            onClose={closeContextMenu}
+            canvas={getPageCanvas(pageId)}
+            onCopy={() => onCopy(getPageCanvas(pageId))}
+            onPaste={() => onPaste(getPageCanvas(pageId))}
+            canDelete={canRemoveMedia(getPageCanvas(pageId)?.getActiveObject())}
+            onDelete={() => {
+              if (canRemoveMedia(getPageCanvas(pageId)?.getActiveObject())) onDelete();
+            }}
+          />
+        )}
         {contextMenu?.kind === "page" && (
           <PageContextMenu x={contextMenu.x} y={contextMenu.y} onClose={closeContextMenu} />
         )}
