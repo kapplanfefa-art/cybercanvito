@@ -28,5 +28,5 @@
 - [x] Manter todos os itens inativos e testar abertura, reabertura, contraste e fechamento.
 
 # Ícone de cor do texto
-- [ ] Corrigir a faixa arco-íris abaixo do A, preservando o fundo do editor.
-- [ ] Verificar o ícone visível e a abertura do seletor no editor.
+- [x] Corrigir a faixa arco-íris abaixo do A, preservando o fundo do editor.
+- [x] Verificar o ícone visível e a abertura do seletor no editor.
