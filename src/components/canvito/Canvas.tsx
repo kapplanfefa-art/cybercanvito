@@ -4,7 +4,7 @@ import { ImagePlus, Plus, Trash2, ChevronUp, ChevronDown, Video } from "lucide-r
 import { toast } from "sonner";
 import type * as fabric from "fabric";
 import { useEditor, type UploadedFile } from "./editor-context";
-import { createMediaClipboard } from "./media-clipboard";
+import { clipboardShortcut, createMediaClipboard } from "./media-clipboard";
 import { MediaContextMenu } from "./MediaContextMenu";
 import { PageContextMenu } from "./PageContextMenu";
 import { canRemoveMedia, pageContextMenu as pageContextMenuKind } from "./media-menu-policy";
@@ -31,7 +31,7 @@ export const Canvas = memo(function Canvas() {
   } = useEditor();
   const [isDragging, setIsDragging] = useState(false);
   const clipboardRef = useRef(createMediaClipboard());
-  const objectClipboardRef = useRef<fabric.Object | null>(null);
+  const objectClipboardRef = useRef<Promise<fabric.Object> | null>(null);
   const clipboardKindRef = useRef<"media" | "object" | null>(null);
   const copyMedia = useCallback((canvas: fabric.Canvas | null) => {
     const source = canvas?.getActiveObject();
@@ -42,9 +42,9 @@ export const Canvas = memo(function Canvas() {
       return;
     }
     clipboardKindRef.current = "object";
-    void source.clone().then((copy) => {
-      objectClipboardRef.current = copy;
-    }).catch(() => toast.error("Não foi possível copiar o elemento."));
+    const pending = source.clone();
+    objectClipboardRef.current = pending;
+    void pending.catch(() => toast.error("Não foi possível copiar o elemento."));
   }, []);
   const pasteMedia = useCallback((canvas: fabric.Canvas | null) => {
     if (!canvas) return;
@@ -54,7 +54,7 @@ export const Canvas = memo(function Canvas() {
     }
     const copiedObject = objectClipboardRef.current;
     if (!copiedObject || clipboardKindRef.current !== "object") return;
-    void copiedObject.clone().then((copy) => {
+    void copiedObject.then(object => object.clone()).then((copy) => {
       if (canvas.disposed || canvas.destroyed) return;
       copy.set({
         left: (copy.left ?? 0) + 20,
@@ -114,21 +114,20 @@ export const Canvas = memo(function Canvas() {
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       const isInput = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
+      const selected = activeCanvas?.getActiveObject() as (fabric.Object & { isEditing?: boolean }) | undefined;
+      const shortcut = clipboardShortcut(e, Boolean(isInput || selected?.isEditing));
+      if (shortcut === "copy" && selected) {
+        e.preventDefault();
+        copyMedia(activeCanvas);
+        return;
+      }
+      if (shortcut === "paste" && clipboardKindRef.current !== null) {
+        e.preventDefault();
+        pasteMedia(activeCanvas);
+        return;
+      }
       
       if ((e.ctrlKey || e.metaKey) && !isInput) {
-        const key = e.key.toLowerCase();
-        if (key === "c" && activeCanvas?.getActiveObject()) {
-          e.preventDefault();
-          copyMedia(activeCanvas);
-          return;
-        }
-        if (key === "v" && clipboardKindRef.current !== null) {
-          const selected = activeCanvas?.getActiveObject() as (fabric.Object & { isEditing?: boolean }) | undefined;
-          if (selected?.isEditing) return;
-          e.preventDefault();
-          pasteMedia(activeCanvas);
-          return;
-        }
         if (e.key.toLowerCase() === "z") {
           e.preventDefault();
           if (e.shiftKey) redo();
@@ -155,8 +154,8 @@ export const Canvas = memo(function Canvas() {
         deletePage(activePageId);
       }
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
   }, [activeCanvas, deleteActiveObject, activePageId, pages.length, deletePage, undo, redo, copyMedia, pasteMedia]);
 
   return (
