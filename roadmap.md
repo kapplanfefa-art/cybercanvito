@@ -33,4 +33,4 @@
 
 # Reconexão do menu de mídia
 - [x] Renderizar o menu existente em qualquer área do papel com imagem ou vídeo, preservando os comandos já ativados.
-- [ ] Verificar imagem, vídeo, área em branco e reabertura no editor; executar regressões.
+- [x] Verificar imagem, vídeo, área em branco e reabertura no editor; executar regressões.
