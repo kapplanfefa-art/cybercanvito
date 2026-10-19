@@ -32,3 +32,16 @@ describe("page media menu scope", () => {
     expect(pageHasMedia([object("rect", true), object("text")])).toBe(false);
   });
 });
+
+describe("page context menu choice", () => {
+  it("shows the page menu on a paper holding only the page itself", () => {
+    expect(pageContextMenu([object("rect", true)])).toBe("page");
+    expect(pageContextMenu([])).toBe("page");
+  });
+  it("shows the page menu when the paper holds text but no image or video", () => {
+    expect(pageContextMenu([object("rect", true), object("text")])).toBe("page");
+  });
+  it("shows the media menu as soon as the paper holds an image or video", () => {
+    expect(pageContextMenu([object("rect", true), object("image")])).toBe("media");
+  });
+});
