@@ -1,5 +1,6 @@
 interface PageMenuObject {
   isArtboard?: boolean;
+  isEditing?: boolean;
   isType: (type: string) => boolean;
 }
 
@@ -10,6 +11,12 @@ export function pageHasMedia(objects: readonly PageMenuObject[]): boolean {
 
 export function canRemoveMedia(object: PageMenuObject | null | undefined): boolean {
   return Boolean(object && !object.isArtboard && object.isType("image"));
+}
+
+/** Delete operates on a selection only; editing must retain native key handling. */
+export function deletionShortcut(key: string, object: PageMenuObject | null | undefined, editing: boolean): boolean {
+  return (key === "Delete" || key === "Backspace") && !editing
+    && Boolean(object && !object.isArtboard && !object.isEditing);
 }
 
 export type PageMenuKind = "media" | "page";

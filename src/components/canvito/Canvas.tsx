@@ -7,7 +7,7 @@ import { useEditor, type UploadedFile } from "./editor-context";
 import { clipboardShortcut, createMediaClipboard } from "./media-clipboard";
 import { MediaContextMenu } from "./MediaContextMenu";
 import { PageContextMenu } from "./PageContextMenu";
-import { canRemoveMedia, pageContextMenu as pageContextMenuKind } from "./media-menu-policy";
+import { canRemoveMedia, deletionShortcut, pageContextMenu as pageContextMenuKind } from "./media-menu-policy";
 
 /**
  * The Workspace = a single scrollable gray container. Pages stack vertically,
@@ -22,7 +22,6 @@ export const Canvas = memo(function Canvas() {
     deletePage,
     addImageFromFile,
     activeCanvas,
-    activePageId,
     deleteActiveObject,
     fitToScreen,
     undo,
@@ -141,22 +140,14 @@ export const Canvas = memo(function Canvas() {
         }
       }
 
-      if (e.key !== "Delete" && e.key !== "Backspace") return;
-      if (isInput) return;
-
-      if (activeCanvas?.getActiveObject()) {
+      if (deletionShortcut(e.key, selected, Boolean(isInput))) {
         e.preventDefault();
         deleteActiveObject();
-        return;
-      }
-      if (activePageId && pages.length > 1) {
-        e.preventDefault();
-        deletePage(activePageId);
       }
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [activeCanvas, deleteActiveObject, activePageId, pages.length, deletePage, undo, redo, copyMedia, pasteMedia]);
+  }, [activeCanvas, deleteActiveObject, undo, redo, copyMedia, pasteMedia]);
 
   return (
     <div 

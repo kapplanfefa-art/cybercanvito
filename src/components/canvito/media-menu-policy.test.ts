@@ -1,7 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { canRemoveMedia, pageContextMenu, pageHasMedia } from "./media-menu-policy";
+import { canRemoveMedia, deletionShortcut, pageContextMenu, pageHasMedia } from "./media-menu-policy";
 
 const object = (type: string, isArtboard = false) => ({ isArtboard, isType: (expected: string) => type === expected });
+
+describe("deletion shortcut", () => {
+  it("deletes selected image and video-backed image with Delete", () => {
+    expect(deletionShortcut("Delete", object("image"), false)).toBe(true);
+  });
+  it("preserves Backspace deletion of selected objects", () => {
+    expect(deletionShortcut("Backspace", object("image"), false)).toBe(true);
+  });
+  it("never deletes the paper or a page with no selection", () => {
+    expect(deletionShortcut("Delete", object("rect", true), false)).toBe(false);
+    expect(deletionShortcut("Delete", null, false)).toBe(false);
+  });
+  it("leaves Delete to the input while typing", () => {
+    expect(deletionShortcut("Delete", object("image"), true)).toBe(false);
+  });
+  it("leaves Delete to Fabric during text editing", () => {
+    expect(deletionShortcut("Delete", { ...object("text"), isEditing: true }, false)).toBe(false);
+  });
+  it("does not delete for unrelated keys", () => {
+    expect(deletionShortcut("Enter", object("image"), false)).toBe(false);
+  });
+});
 
 describe("media removal scope", () => {
   it("allows removing selected images and video-backed images", () => {
