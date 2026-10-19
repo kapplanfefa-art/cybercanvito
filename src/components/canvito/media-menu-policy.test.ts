@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canRemoveMedia, pageHasMedia } from "./media-menu-policy";
+import { canRemoveMedia, pageContextMenu, pageHasMedia } from "./media-menu-policy";
 
 const object = (type: string, isArtboard = false) => ({ isArtboard, isType: (expected: string) => type === expected });
 

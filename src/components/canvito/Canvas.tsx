@@ -1,10 +1,13 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { ImagePlus, Plus, Trash2, ChevronUp, ChevronDown, Video } from "lucide-react";
 import { toast } from "sonner";
 import type * as fabric from "fabric";
 import { useEditor, type UploadedFile } from "./editor-context";
 import { createMediaClipboard } from "./media-clipboard";
+import { MediaContextMenu } from "./MediaContextMenu";
+import { PageContextMenu } from "./PageContextMenu";
+import { pageContextMenu as pageContextMenuKind } from "./media-menu-policy";
 
 /**
  * The Workspace = a single scrollable gray container. Pages stack vertically,
