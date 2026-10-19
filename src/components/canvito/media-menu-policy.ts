@@ -11,3 +11,10 @@ export function pageHasMedia(objects: readonly PageMenuObject[]): boolean {
 export function canRemoveMedia(object: PageMenuObject | null | undefined): boolean {
   return Boolean(object && !object.isArtboard && object.isType("image"));
 }
+
+export type PageMenuKind = "media" | "page";
+
+/** A paper with media keeps the media menu; an empty one gets the page menu. */
+export function pageContextMenu(objects: readonly PageMenuObject[]): PageMenuKind {
+  return pageHasMedia(objects) ? "media" : "page";
+}

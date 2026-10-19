@@ -22,3 +22,7 @@
 # Camadas pelo menu de mídia
 - [x] Ativar submenu com quatro comandos de ordem e Mostrar camadas.
 - [x] Testar alteração de ordem, preservação do papel e reabertura do menu.
+
+# Menu da página sem mídia
+- [x] Abrir o menu da referência ao clicar com o botão direito num papel sem imagem nem vídeo.
+- [x] Manter todos os itens inativos e testar abertura, reabertura, contraste e fechamento.

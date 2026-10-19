@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import type * as fabric from "fabric";
 import { useEditor, type UploadedFile } from "./editor-context";
 import { createMediaClipboard } from "./media-clipboard";
+import { MediaContextMenu } from "./MediaContextMenu";
+import { PageContextMenu } from "./PageContextMenu";
+import { pageContextMenu as pageContextMenuKind } from "./media-menu-policy";
 
 /**
  * The Workspace = a single scrollable gray container. Pages stack vertically,
@@ -238,11 +241,43 @@ const PageBoard = memo(function PageBoard({
     activePageId,
     openImagePicker,
     deletePage,
+    getPageCanvas,
     pages,
     reorderPage,
     isMagicBrushActive,
   } = useEditor();
   const canDelete = pages.length > 1;
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; kind: "media" | "page" } | null>(null);
+
+  const onContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActivePageId(pageId);
+    const fab = getPageCanvas(pageId);
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      kind: pageContextMenuKind(fab?.getObjects() ?? []),
+    });
+  }, [getPageCanvas, pageId, setActivePageId]);
+
+  useEffect(() => {
+    if (!contextMenu) return;
+    const close = () => setContextMenu(null);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setContextMenu(null); };
+    window.addEventListener("mousedown", close);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousedown", close);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [contextMenu]);
+
+  const closeContextMenu = useCallback(() => setContextMenu(null), []);
+
+
 
   const { w, h } = useMemo(() => {
     const nextScale = zoom / 100;
@@ -339,6 +374,7 @@ const PageBoard = memo(function PageBoard({
       <div
         id={isActive ? "canvas-workspace" : undefined}
         data-page-id={pageId}
+        onContextMenu={onContextMenu}
         className={
           "relative bg-white transition-shadow " +
           (isActive
@@ -353,6 +389,9 @@ const PageBoard = memo(function PageBoard({
           <OverlayPaintCanvas pageId={pageId} width={w} height={h} />
         )}
         <PageEmptyCTA pageId={pageId} onAddImage={onAddImage} />
+        {contextMenu?.kind === "page" && (
+          <PageContextMenu x={contextMenu.x} y={contextMenu.y} onClose={closeContextMenu} />
+        )}
       </div>
     </div>
   );

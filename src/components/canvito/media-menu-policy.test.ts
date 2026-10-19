@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canRemoveMedia, pageHasMedia } from "./media-menu-policy";
+import { canRemoveMedia, pageContextMenu, pageHasMedia } from "./media-menu-policy";
 
 const object = (type: string, isArtboard = false) => ({ isArtboard, isType: (expected: string) => type === expected });
 
@@ -30,5 +30,18 @@ describe("page media menu scope", () => {
   it("keeps the empty page menu when the page has no media", () => {
     expect(pageHasMedia([])).toBe(false);
     expect(pageHasMedia([object("rect", true), object("text")])).toBe(false);
+  });
+});
+
+describe("page context menu choice", () => {
+  it("shows the page menu on a paper holding only the page itself", () => {
+    expect(pageContextMenu([object("rect", true)])).toBe("page");
+    expect(pageContextMenu([])).toBe("page");
+  });
+  it("shows the page menu when the paper holds text but no image or video", () => {
+    expect(pageContextMenu([object("rect", true), object("text")])).toBe("page");
+  });
+  it("shows the media menu as soon as the paper holds an image or video", () => {
+    expect(pageContextMenu([object("rect", true), object("image")])).toBe("media");
   });
 });
