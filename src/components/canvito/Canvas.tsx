@@ -231,7 +231,7 @@ export const Canvas = memo(function Canvas() {
         </div>
 
         {/* Drag overlay */}
-        {isDragging && (
+        {isDragging && createPortal(
           <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-[oklch(0.55_0.28_295/0.08)] ring-2 ring-inset ring-[oklch(0.55_0.28_295)]">
             <div className="rounded-xl bg-white/90 px-5 py-3 text-sm font-semibold text-[oklch(0.55_0.28_295)] shadow-xl shadow-black/10">
               Solte a imagem para inserir no papel ativo
