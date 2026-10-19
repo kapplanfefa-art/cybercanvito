@@ -80,7 +80,7 @@ export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, can
       ref={ref}
       role="menu"
       aria-label="Menu de imagem ou vídeo"
-      className={cn("media-context-menu fixed z-[100] max-h-[calc(100dvh-16px)] w-[428px] max-w-[calc(100vw-16px)] overflow-y-auto rounded-lg border border-context-border bg-card p-2 text-card-foreground", className)}
+      className={cn("media-context-menu fixed z-[100] max-h-[calc(100dvh-16px)] w-[428px] max-w-[calc(100vw-16px)] overflow-y-auto rounded-lg border border-context-border bg-card p-1.5 text-card-foreground", className)}
       onMouseDown={event => event.stopPropagation()}
       onContextMenu={event => { event.preventDefault(); event.stopPropagation(); }}
       onKeyDown={event => {
