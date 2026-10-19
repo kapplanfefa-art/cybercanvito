@@ -36,5 +36,5 @@
 - [x] Verificar imagem, vídeo, área em branco e reabertura no editor; executar regressões.
 
 # Aparência da cópia e atalhos
-- [ ] Preservar os controles originais roxos ao colar, sem alterar o tamanho da mídia.
-- [ ] Garantir Ctrl+C/Ctrl+V sem interferir na edição de texto e verificar no editor.
+- [x] Preservar os controles originais roxos ao colar, sem alterar o tamanho da mídia.
+- [x] Garantir Ctrl+C/Ctrl+V sem interferir na edição de texto e verificar no editor.
