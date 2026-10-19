@@ -74,6 +74,7 @@ type EditorCtx = {
   addShapeFromUrl: (url: string) => Promise<void>;
 
   addPage: () => void;
+  duplicatePage: (pageId: string) => void;
   deletePage: (pageId: string) => void;
   deleteActiveObject: () => void;
   startCropMode: () => void;
@@ -287,6 +288,8 @@ export function EditorProvider({ children }: { children: ReactNode }) {
 
   // Map of pageId -> Fabric.Canvas (one canvas per stacked page)
   const canvasesRef = useRef<Map<string, fabric.Canvas>>(new Map());
+  /** Object JSON snapshots waiting for the duplicated page's canvas to register. */
+  const pendingPageDuplicateRef = useRef<Map<string, Record<string, unknown>[]>>(new Map());
   const activePageIdRef = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const pendingInsertAtRef = useRef<ImageInsertPoint | null>(null);
@@ -542,6 +545,21 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       map.set(pageId, fab);
       initFabricCanvas(pageId, fab, w, h);
 
+      // Replay a pending page duplication into this freshly registered canvas.
+      const pendingDuplicate = pendingPageDuplicateRef.current.get(pageId);
+      if (pendingDuplicate) {
+        pendingPageDuplicateRef.current.delete(pageId);
+        void fabric.util.enlivenObjects<fabric.Object>(pendingDuplicate).then(enlivened => {
+          if (fab.disposed || fab.destroyed) return;
+          enlivened.forEach(obj => fab.add(obj));
+          fab.requestRenderAll();
+          // Focus the duplicate so the user keeps working on it right away.
+          activePageIdRef.current = pageId;
+          setActivePageIdState(pageId);
+          setActiveCanvas(fab);
+        }).catch(() => toast.error("Não foi possível duplicar a página."));
+      }
+
       // First-ever registration -> auto-activate
       if (!activePageIdRef.current) {
         activePageIdRef.current = pageId;
@@ -664,6 +682,30 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   // ---------- Pages ----------
   const addPage = useCallback(() => {
     setPages((prev) => [...prev, { id: makePageId() }]);
+  }, []);
+
+  /** Duplicate a page: a new page right after it, carrying every content object. */
+  const duplicatePage = useCallback((pageId: string) => {
+    const source = canvasesRef.current.get(pageId);
+    if (!source) return;
+    // Snapshot only real content: never the artboard paper nor crop/brush support objects.
+    const snapshot = source.getObjects().filter(obj => {
+      const o = obj as fabric.Object & {
+        isArtboard?: boolean; isCropOverlay?: boolean; isCropControl?: boolean;
+        isGuideLine?: boolean; isCropAction?: boolean; isBrushCursor?: boolean; isMagicBrushMask?: boolean;
+      };
+      return !o.isArtboard && !o.isCropOverlay && !o.isCropControl
+        && !o.isGuideLine && !o.isCropAction && !o.isBrushCursor && !o.isMagicBrushMask;
+    }).map(obj => obj.toObject());
+    const newId = makePageId();
+    pendingPageDuplicateRef.current.set(newId, snapshot);
+    setPages(prev => {
+      const idx = prev.findIndex(p => p.id === pageId);
+      if (idx === -1) return [...prev, { id: newId }];
+      const next = [...prev];
+      next.splice(idx + 1, 0, { id: newId });
+      return next;
+    });
   }, []);
 
   const deletePage = useCallback((pageId: string) => {
