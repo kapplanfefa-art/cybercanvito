@@ -5,7 +5,7 @@ export interface MediaSnapshot {
 }
 
 // Fabric omits interaction settings from its default JSON serialization.
-const selectionProperties = [
+const selectionProperties: (keyof FabricImage)[] = [
   "cornerColor", "cornerStrokeColor", "borderColor", "cornerSize", "touchCornerSize",
   "transparentCorners", "cornerStyle", "borderScaleFactor", "padding",
   "hasControls", "hasBorders", "lockScalingX", "lockScalingY", "lockRotation",
@@ -32,15 +32,18 @@ export async function snapshotMedia(source: FabricImage): Promise<MediaSnapshot>
     return image;
   };
   if (element.tagName !== "VIDEO") {
-    const frozen = await source.clone(selectionProperties);
+    const frozen = await source.clone(selectionProperties.map(String));
     return { instantiate: async () => {
-      const image = await frozen.clone(selectionProperties);
+      const image = await frozen.clone(selectionProperties.map(String));
       return restoreControls(image);
     } };
   }
   const original = element as HTMLVideoElement;
   const src = original.currentSrc || original.src;
-  const options = source.toObject(selectionProperties);
+  const options = {
+    ...source.toObject(),
+    ...Object.fromEntries(selectionProperties.map(key => [key, source[key]])),
+  };
   const currentTime = original.currentTime;
   const crossOrigin = original.crossOrigin;
   return { instantiate: async () => {
