@@ -381,6 +381,7 @@ const PageBoard = memo(function PageBoard({
       <div
         id={isActive ? "canvas-workspace" : undefined}
         data-page-id={pageId}
+        onContextMenu={onContextMenu}
         className={
           "relative bg-white transition-shadow " +
           (isActive
@@ -395,6 +396,9 @@ const PageBoard = memo(function PageBoard({
           <OverlayPaintCanvas pageId={pageId} width={w} height={h} />
         )}
         <PageEmptyCTA pageId={pageId} onAddImage={onAddImage} />
+        {contextMenu?.kind === "page" && (
+          <PageContextMenu x={contextMenu.x} y={contextMenu.y} onClose={closeContextMenu} />
+        )}
       </div>
     </div>
   );
