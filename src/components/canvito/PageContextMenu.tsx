@@ -79,11 +79,11 @@ export function PageContextMenu({ x, y, onClose, className, ...props }: PageCont
             role="menuitem"
             aria-disabled="true"
             aria-haspopup={submenu ? "menu" : undefined}
-            className={cn("h-9 w-full justify-start gap-2 rounded-lg px-2 text-left text-sm font-normal text-card-foreground hover:bg-muted hover:text-card-foreground focus-visible:bg-muted [&_svg]:size-5")}
+            className={cn("h-9 w-full justify-start gap-2 rounded-lg px-2 text-left text-sm font-normal text-card-foreground hover:bg-context-hover hover:text-card-foreground focus-visible:bg-context-hover [&_svg]:size-5")}
           >
             <Icon aria-hidden="true" />
             <span className="min-w-0 flex-1 whitespace-normal leading-tight">{label}</span>
-            {shortcut && <span className="shrink-0 rounded-md bg-muted px-2 py-1 text-[11px] leading-none text-muted-foreground">{shortcut}</span>}
+            {shortcut && <span className="shrink-0 rounded-md bg-context-hover px-2 py-1 text-[11px] leading-none text-context-muted">{shortcut}</span>}
             {submenu && <ChevronRight aria-hidden="true" className="!size-4" />}
             {premium && <Crown aria-hidden="true" className="!size-3 text-context-muted" />}
           </Button>
