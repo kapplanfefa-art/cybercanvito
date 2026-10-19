@@ -165,16 +165,18 @@ export const TextToolbar = memo(function TextToolbar() {
       {/* Color */}
       <div className="relative">
         <Button variant="ghost"
+          size="icon"
+          aria-label="Cor do texto"
           onClick={() => {
             setColorOpen((v) => !v);
             setFontOpen(false);
             setAlignOpen(false);
           }}
-          className="flex h-7 w-7 flex-col items-center justify-center rounded-md hover:bg-[var(--neon-violet)]/15"
+          className="flex h-7 w-7 shrink-0 flex-col items-center justify-center gap-0.5 rounded-md p-0 text-foreground hover:bg-neon-violet/15"
           title="Cor do texto"
         >
-          <span className="text-[11px] font-bold leading-none">A</span>
-          <span className="mt-0.5 h-[3px] w-4 rounded-sm" style={{ background: "linear-gradient(90deg, #ff3b30, #ff9500, #ffcc00, #34c759, #00c7be, #007aff, #af52de)" }} />
+          <span aria-hidden="true" className="shrink-0 text-base font-medium leading-none">A</span>
+          <span aria-hidden="true" className="text-color-spectrum block h-1 w-5 shrink-0 rounded-full" />
         </Button>
         {colorOpen && (
           <div className="absolute left-0 top-9 z-50 rounded-lg border border-[var(--neon-violet)]/40 bg-[oklch(0.18_0.04_280)]/95 p-2 shadow-[0_10px_30px_oklch(0.55_0.28_295/0.35)] backdrop-blur-md">

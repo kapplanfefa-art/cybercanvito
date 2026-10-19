@@ -26,3 +26,7 @@
 # Menu da página sem mídia
 - [x] Abrir o menu da referência ao clicar com o botão direito num papel sem imagem nem vídeo.
 - [x] Manter todos os itens inativos e testar abertura, reabertura, contraste e fechamento.
+
+# Ícone de cor do texto
+- [x] Corrigir a faixa arco-íris abaixo do A, preservando o fundo do editor.
+- [x] Verificar o ícone visível e a abertura do seletor no editor.
