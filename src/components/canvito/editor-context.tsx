@@ -515,6 +515,11 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         selection: true,
         renderOnAddRemove: true
       });
+      // Pages registered after a zoom change must adopt the current zoom;
+      // otherwise they render at natural size and overflow the paper.
+      const scale = zoom / 100;
+      fab.setDimensions({ width: w * scale, height: h * scale });
+      fab.setZoom(scale);
       (fab as any)._editorCtx = { isMagicBrushActive, brushSize };
       
       fab.selection = !isMagicBrushActive;
@@ -574,7 +579,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         setActiveCanvas(fab);
       }
     },
-    [initFabricCanvas, isMagicBrushActive, brushSize],
+    [initFabricCanvas, isMagicBrushActive, brushSize, zoom],
   );
 
   /** Manually mark a page as active (e.g. from a click handler). */
