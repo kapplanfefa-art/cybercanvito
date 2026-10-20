@@ -515,6 +515,11 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         selection: true,
         renderOnAddRemove: true
       });
+      // Pages registered after a zoom change must adopt the current zoom;
+      // otherwise they render at natural size and overflow the paper.
+      const scale = zoom / 100;
+      fab.setDimensions({ width: w * scale, height: h * scale });
+      fab.setZoom(scale);
       (fab as any)._editorCtx = { isMagicBrushActive, brushSize };
       
       fab.selection = !isMagicBrushActive;
@@ -546,11 +551,13 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       initFabricCanvas(pageId, fab, w, h);
 
       // Replay a pending page duplication into this freshly registered canvas.
+      // The snapshot is only consumed after objects land on a live canvas, so a
+      // remount (e.g. React StrictMode) replays it again instead of losing it.
       const pendingDuplicate = pendingPageDuplicateRef.current.get(pageId);
       if (pendingDuplicate) {
-        pendingPageDuplicateRef.current.delete(pageId);
         void fabric.util.enlivenObjects<fabric.Object>(pendingDuplicate).then(enlivened => {
           if (fab.disposed || fab.destroyed) return;
+          pendingPageDuplicateRef.current.delete(pageId);
           enlivened.forEach(obj => fab.add(obj));
           fab.requestRenderAll();
           // Focus the duplicate so the user keeps working on it right away.
@@ -567,7 +574,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         setActiveCanvas(fab);
       }
     },
-    [initFabricCanvas, isMagicBrushActive, brushSize],
+    [initFabricCanvas, isMagicBrushActive, brushSize, zoom],
   );
 
   /** Manually mark a page as active (e.g. from a click handler). */
@@ -1486,6 +1493,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     addVideoFromSource,
     addShapeFromUrl,
     addPage,
+    duplicatePage,
     deletePage,
     deleteActiveObject,
     startCropMode,
@@ -1514,7 +1522,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   }), [
     activeCanvas, registerPageCanvas, setActivePageId, artboard, setArtboardPreset, preset, zoom,
     setZoom, fitToScreen, addImageFromSource, addImageFromFile, addVideoFromSource, addShapeFromUrl, openImagePicker, addPage,
-    deletePage, deleteActiveObject, startCropMode, applyCrop, cancelCrop, isCropMode, getPageCanvas,
+    duplicatePage, deletePage, deleteActiveObject, startCropMode, applyCrop, cancelCrop, isCropMode, getPageCanvas,
     pages, activePageId, undo, redo, historyTick, resetDesign, reorderPage, brushSize, isMagicBrushActive,
     isProcessingMagic, clearMagicBrush, applyMagicRemoval, uploadedFiles, removeUploadedFile, addText
   ]);

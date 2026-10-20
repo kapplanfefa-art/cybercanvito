@@ -240,6 +240,7 @@ const PageBoard = memo(function PageBoard({
     activePageId,
     openImagePicker,
     deletePage,
+    duplicatePage,
     getPageCanvas,
     pages,
     reorderPage,
@@ -403,7 +404,7 @@ const PageBoard = memo(function PageBoard({
           />
         )}
         {contextMenu?.kind === "page" && (
-          <PageContextMenu x={contextMenu.x} y={contextMenu.y} onClose={closeContextMenu} />
+          <PageContextMenu x={contextMenu.x} y={contextMenu.y} onClose={closeContextMenu} onDuplicatePage={() => duplicatePage(pageId)} />
         )}
       </div>
     </div>
