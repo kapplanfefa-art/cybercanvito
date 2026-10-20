@@ -553,8 +553,12 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       if (pendingDuplicate) {
         void fabric.util.enlivenObjects<fabric.Object>(pendingDuplicate).then(enlivened => {
           console.log("[dup] enlivened", pageId, enlivened.length, "disposed:", fab.disposed, "destroyed:", (fab as unknown as { destroyed?: boolean }).destroyed);
-          pendingPageDuplicateRef.current.delete(pageId);
-          enlivened.forEach(obj => fab.add(obj));
+          try {
+            pendingPageDuplicateRef.current.delete(pageId);
+            enlivened.forEach(obj => fab.add(obj));
+          } catch (err) { console.log("[dup] ADD ERROR", err); }
+          console.log("[dup] added", pageId, "objects now:", fab.getObjects().length, "el:", Boolean(fab.getElement?.()));
+          setTimeout(() => console.log("[dup] later", pageId, "objects:", fab.getObjects().length, "disposed:", fab.disposed), 1200);
           fab.requestRenderAll();
           // Focus the duplicate so the user keeps working on it right away.
           activePageIdRef.current = pageId;
