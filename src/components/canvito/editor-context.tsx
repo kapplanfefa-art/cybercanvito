@@ -549,9 +549,10 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       // The snapshot is only consumed after objects land on a live canvas, so a
       // remount (e.g. React StrictMode) replays it again instead of losing it.
       const pendingDuplicate = pendingPageDuplicateRef.current.get(pageId);
+      console.log("[dup] register", pageId, "pending:", Boolean(pendingDuplicate));
       if (pendingDuplicate) {
         void fabric.util.enlivenObjects<fabric.Object>(pendingDuplicate).then(enlivened => {
-          if (fab.disposed || fab.destroyed) return;
+          console.log("[dup] enlivened", pageId, enlivened.length, "disposed:", fab.disposed, "destroyed:", (fab as unknown as { destroyed?: boolean }).destroyed);
           pendingPageDuplicateRef.current.delete(pageId);
           enlivened.forEach(obj => fab.add(obj));
           fab.requestRenderAll();
@@ -689,6 +690,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   /** Duplicate a page: a new page right after it, carrying every content object. */
   const duplicatePage = useCallback((pageId: string) => {
     const source = canvasesRef.current.get(pageId);
+    console.log("[dup] called", pageId, "source:", Boolean(source));
     if (!source) return;
     // Snapshot only real content: never the artboard paper nor crop/brush support objects.
     const snapshot = source.getObjects().filter(obj => {
@@ -701,6 +703,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     }).map(obj => obj.toObject());
     const newId = makePageId();
     pendingPageDuplicateRef.current.set(newId, snapshot);
+    console.log("[dup] pending set", newId, "objects:", snapshot.length);
     setPages(prev => {
       const idx = prev.findIndex(p => p.id === pageId);
       if (idx === -1) return [...prev, { id: newId }];
