@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, type ComponentProps } from "react";
 import { createPortal } from "react-dom";
 import {
-  Copy, Paintbrush, Clipboard, CopyPlus, FilePlus2, MessageCircle, MoveHorizontal,
+  CopyPlus, FilePlus2, MessageCircle, MoveHorizontal,
   Hash, Video, ChevronRight, Crown, type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,14 +14,12 @@ interface PageMenuEntry {
   submenu?: boolean;
   divider?: boolean;
   premium?: boolean;
+  action?: "duplicate";
 }
 
 /** Page-level options shown while the paper holds no image and no video. */
 const entries: PageMenuEntry[] = [
-  { label: "Copiar", icon: Copy, shortcut: "Ctrl+C" },
-  { label: "Copiar estilo da página", icon: Paintbrush, premium: true },
-  { label: "Colar", icon: Clipboard, shortcut: "Ctrl+V" },
-  { label: "Duplicar página", icon: CopyPlus, shortcut: "Ctrl+D" },
+  { label: "Duplicar página", icon: CopyPlus, shortcut: "Ctrl+D", action: "duplicate" },
   { label: "Adicionar página", icon: FilePlus2, shortcut: "Ctrl+Enter", divider: true },
   { label: "Comentar", icon: MessageCircle, shortcut: "Ctrl+Alt+N", divider: true },
   { label: "Redimensionar página", icon: MoveHorizontal, premium: true, divider: true },
@@ -33,10 +31,11 @@ export interface PageContextMenuProps extends ComponentProps<"div"> {
   x: number;
   y: number;
   onClose: () => void;
+  onDuplicatePage?: () => void;
 }
 
-/** Presentation only: every entry is inert until an action is explicitly requested. */
-export function PageContextMenu({ x, y, onClose, className, ...props }: PageContextMenuProps) {
+/** Only explicitly requested actions are enabled; every other entry stays inert. */
+export function PageContextMenu({ x, y, onClose, onDuplicatePage, className, ...props }: PageContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const menu = ref.current;
@@ -47,7 +46,7 @@ export function PageContextMenu({ x, y, onClose, className, ...props }: PageCont
       menu.style.top = `${Math.max(8, Math.min(y, window.innerHeight - rect.height - 8))}px`;
     };
     position();
-    menu.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus({ preventScroll: true });
+    menu.querySelector<HTMLButtonElement>('[role="menuitem"]:not([aria-disabled="true"])')?.focus({ preventScroll: true });
     window.addEventListener("resize", onClose);
     return () => window.removeEventListener("resize", onClose);
   }, [x, y, onClose]);
@@ -72,13 +71,13 @@ export function PageContextMenu({ x, y, onClose, className, ...props }: PageCont
         items[next]?.focus();
       }}
     >
-      {entries.map(({ label, icon: Icon, shortcut, submenu, divider, premium }) => (
+      {entries.map(({ label, icon: Icon, shortcut, submenu, divider, premium, action }) => (
         <div key={label} className={cn(divider && "mt-1 border-t border-border pt-1")}>
           <Button
             variant="ghost"
             role="menuitem"
-            aria-disabled="true"
-            aria-haspopup={submenu ? "menu" : undefined}
+            aria-disabled={!action}
+            onClick={action === "duplicate" ? () => { onDuplicatePage?.(); onClose(); } : undefined}
             className={cn("h-9 w-full justify-start gap-2 rounded-lg px-2 text-left text-sm font-normal text-card-foreground hover:bg-context-hover hover:text-card-foreground focus-visible:bg-context-hover [&_svg]:size-5")}
           >
             <Icon aria-hidden="true" />
