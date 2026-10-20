@@ -546,11 +546,13 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       initFabricCanvas(pageId, fab, w, h);
 
       // Replay a pending page duplication into this freshly registered canvas.
+      // The snapshot is only consumed after objects land on a live canvas, so a
+      // remount (e.g. React StrictMode) replays it again instead of losing it.
       const pendingDuplicate = pendingPageDuplicateRef.current.get(pageId);
       if (pendingDuplicate) {
-        pendingPageDuplicateRef.current.delete(pageId);
         void fabric.util.enlivenObjects<fabric.Object>(pendingDuplicate).then(enlivened => {
           if (fab.disposed || fab.destroyed) return;
+          pendingPageDuplicateRef.current.delete(pageId);
           enlivened.forEach(obj => fab.add(obj));
           fab.requestRenderAll();
           // Focus the duplicate so the user keeps working on it right away.
