@@ -7,6 +7,7 @@ import { useEditor, type UploadedFile } from "./editor-context";
 import { clipboardShortcut, createMediaClipboard, snapshotMedia } from "./media-clipboard";
 import { MediaContextMenu } from "./MediaContextMenu";
 import { PageContextMenu } from "./PageContextMenu";
+import { ResizeModal } from "./ResizeModal";
 import { canRemoveMedia, deletionShortcut, pageContextMenu as pageContextMenuKind } from "./media-menu-policy";
 
 /**
@@ -282,6 +283,7 @@ const PageBoard = memo(function PageBoard({
   } = useEditor();
   const canDelete = pages.length > 1;
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; kind: "media" | "page" } | null>(null);
+  const [isResizeOpen, setIsResizeOpen] = useState(false);
 
   const onContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -440,8 +442,9 @@ const PageBoard = memo(function PageBoard({
           />
         )}
         {contextMenu?.kind === "page" && (
-          <PageContextMenu x={contextMenu.x} y={contextMenu.y} onClose={closeContextMenu} onDuplicatePage={() => duplicatePage(pageId)} onAddMedia={() => openImagePicker({ pageId }, "media")} onAddPage={onAddPage} />
+          <PageContextMenu x={contextMenu.x} y={contextMenu.y} onClose={closeContextMenu} onDuplicatePage={() => duplicatePage(pageId)} onAddMedia={() => openImagePicker({ pageId }, "media")} onAddPage={onAddPage} onResizePage={() => setIsResizeOpen(true)} />
         )}
+        <ResizeModal open={isResizeOpen} onOpenChange={setIsResizeOpen} />
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ interface PageMenuEntry {
   submenu?: boolean;
   divider?: boolean;
   premium?: boolean;
-  action?: "duplicate" | "add-media" | "add-page";
+  action?: "duplicate" | "add-media" | "add-page" | "resize-page";
 }
 
 /** Page-level options shown while the paper holds no image and no video. */
@@ -23,7 +23,7 @@ const entries: PageMenuEntry[] = [
   { label: "Duplicar página", icon: CopyPlus, shortcut: "Ctrl+D", action: "duplicate" },
   { label: "Adicionar página", icon: FilePlus2, shortcut: "Ctrl+Enter", divider: true, action: "add-page" },
   { label: "Comentar", icon: MessageCircle, shortcut: "Ctrl+Alt+N", divider: true },
-  { label: "Redimensionar página", icon: MoveHorizontal, premium: true, divider: true },
+  { label: "Redimensionar página", icon: MoveHorizontal, premium: true, divider: true, action: "resize-page" },
   { label: "Guias", icon: Hash, submenu: true },
   { label: "Editar como vídeo", icon: Video },
 ];
@@ -35,10 +35,11 @@ export interface PageContextMenuProps extends ComponentProps<"div"> {
   onDuplicatePage?: () => void;
   onAddMedia: () => void;
   onAddPage: () => void;
+  onResizePage: () => void;
 }
 
 /** Only explicitly requested actions are enabled; every other entry stays inert. */
-export function PageContextMenu({ x, y, onClose, onDuplicatePage, onAddMedia, onAddPage, className, ...props }: PageContextMenuProps) {
+export function PageContextMenu({ x, y, onClose, onDuplicatePage, onAddMedia, onAddPage, onResizePage, className, ...props }: PageContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const menu = ref.current;
@@ -84,6 +85,7 @@ export function PageContextMenu({ x, y, onClose, onDuplicatePage, onAddMedia, on
               onClose();
               if (action === "add-media") onAddMedia();
               else if (action === "add-page") onAddPage();
+              else if (action === "resize-page") onResizePage();
               else onDuplicatePage?.();
             } : undefined}
             className={cn("h-9 w-full justify-start gap-2 rounded-lg px-2 text-left text-sm font-normal text-card-foreground hover:bg-context-hover hover:text-card-foreground focus-visible:bg-context-hover [&_svg]:size-5")}
