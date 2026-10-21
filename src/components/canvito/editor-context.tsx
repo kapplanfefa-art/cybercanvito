@@ -4,6 +4,7 @@ import * as fabric from "fabric";
 import { Path } from "fabric";
 import { toast } from "sonner";
 import { Sparkles, Video } from "lucide-react";
+import { isVideoUpload, mediaPickerAccept, type MediaPickerMode } from "./media-upload-policy";
 
 export type ArtboardPresetId = "square" | "story" | "portrait" | "widescreen" | "landscape";
 
@@ -86,7 +87,7 @@ type EditorCtx = {
   redo: () => void;
   canUndo: boolean;
   canRedo: boolean;
-  openImagePicker: (at?: ImageInsertPoint, mode?: "image" | "video") => void;
+  openImagePicker: (at?: ImageInsertPoint, mode?: MediaPickerMode) => void;
 
   /** Read the live Fabric.Canvas for a given page (null if not registered yet). */
   getPageCanvas: (pageId: string) => fabric.Canvas | null;
@@ -1312,7 +1313,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   // file selected via the shared <input type=file>.
 
   const openImagePicker = useCallback(
-    (at?: ImageInsertPoint, mode: "image" | "video" = "image") => {
+    (at?: ImageInsertPoint, mode: MediaPickerMode = "image") => {
       if (at?.pageId) {
         activePageIdRef.current = at.pageId;
         setActivePageIdState(at.pageId);
@@ -1323,11 +1324,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       const input = document.createElement("input");
       input.type = "file";
       
-      if (mode === "video") {
-        input.accept = "video/mp4, video/webm, video/quicktime, image/gif";
-      } else {
-        input.accept = "image/png, image/jpeg, image/jpg, image/webp";
-      }
+      input.accept = mediaPickerAccept(mode);
       
       input.style.display = "none";
       input.addEventListener("change", async () => {
@@ -1346,7 +1343,12 @@ export function EditorProvider({ children }: { children: ReactNode }) {
           // Criar uma URL de objeto (Blob) para evitar problemas com base64 e memória
           const objectUrl = URL.createObjectURL(f);
           
-          if (mode === "video") {
+          if (target?.pageId) {
+            activePageIdRef.current = target.pageId;
+            setActivePageIdState(target.pageId);
+            setActiveCanvas(canvasesRef.current.get(target.pageId) ?? null);
+          }
+          if (isVideoUpload(mode, f.type)) {
             await addVideoFromSource(objectUrl);
           } else {
             // Para imagens, mantemos a lógica de inserção no canvas, 
@@ -1360,7 +1362,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       document.body.appendChild(input);
       input.click();
     },
-    [addImageFromSource],
+    [addImageFromSource, addVideoFromSource],
   );
 
   useEffect(() => {

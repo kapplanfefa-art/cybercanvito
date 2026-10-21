@@ -42,3 +42,7 @@
 # Exclusão pelo mouse e teclado
 - [x] Garantir Excluir pelo menu e Delete no elemento selecionado, sem apagar o papel ou interferir na digitação.
 - [x] Testar exclusão de imagens e vídeos pelo menu e pelo teclado.
+
+# Adicionar mídia pelos dois menus
+- [x] Acrescentar e ativar “Adicionar imagem ou vídeo” no menu da página e no menu de mídia.
+- [x] Verificar inserção na página clicada e reabertura dos menus.

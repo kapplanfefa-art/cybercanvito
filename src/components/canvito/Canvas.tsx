@@ -394,6 +394,7 @@ const PageBoard = memo(function PageBoard({
             x={contextMenu.x}
             y={contextMenu.y}
             onClose={closeContextMenu}
+            onAddMedia={() => openImagePicker({ pageId }, "media")}
             canvas={getPageCanvas(pageId)}
             onCopy={() => onCopy(getPageCanvas(pageId))}
             onPaste={() => onPaste(getPageCanvas(pageId))}
@@ -404,7 +405,7 @@ const PageBoard = memo(function PageBoard({
           />
         )}
         {contextMenu?.kind === "page" && (
-          <PageContextMenu x={contextMenu.x} y={contextMenu.y} onClose={closeContextMenu} onDuplicatePage={() => duplicatePage(pageId)} />
+          <PageContextMenu x={contextMenu.x} y={contextMenu.y} onClose={closeContextMenu} onDuplicatePage={() => duplicatePage(pageId)} onAddMedia={() => openImagePicker({ pageId }, "media")} />
         )}
       </div>
     </div>
