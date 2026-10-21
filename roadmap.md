@@ -44,5 +44,5 @@
 - [x] Testar exclusão de imagens e vídeos pelo menu e pelo teclado.
 
 # Adicionar mídia pelos dois menus
-- [ ] Acrescentar e ativar “Adicionar imagem ou vídeo” no menu da página e no menu de mídia.
-- [ ] Verificar inserção na página clicada e reabertura dos menus.
+- [x] Acrescentar e ativar “Adicionar imagem ou vídeo” no menu da página e no menu de mídia.
+- [x] Verificar inserção na página clicada e reabertura dos menus.
