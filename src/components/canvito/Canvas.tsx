@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { ImagePlus, Plus, Trash2, ChevronUp, ChevronDown, Video } from "lucide-react";
 import { toast } from "sonner";
@@ -284,6 +284,9 @@ const PageBoard = memo(function PageBoard({
   const canDelete = pages.length > 1;
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; kind: "media" | "page" } | null>(null);
   const [isResizeOpen, setIsResizeOpen] = useState(false);
+  const [horizontalGuideY, setHorizontalGuideY] = useState<number | null>(null);
+  const horizontalGuideRef = useRef<fabric.Line | null>(null);
+  const paperRef = useRef<HTMLDivElement | null>(null);
 
   const onContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -341,24 +344,33 @@ const PageBoard = memo(function PageBoard({
     const canvas = getPageCanvas(pageId);
     if (!canvas) return;
 
-    const guide = orientation === "horizontal"
-      ? new fabric.Line([0, artboard.height / 2, artboard.width, artboard.height / 2], {
-          stroke: "#00A3FF",
-          strokeWidth: 2,
-          strokeDashArray: [10, 6],
-          selectable: false,
-          evented: false,
-          excludeFromExport: true,
-        })
-      : new fabric.Line([artboard.width / 2, 0, artboard.width / 2, artboard.height], {
-          stroke: "#00A3FF",
-          strokeWidth: 2,
-          strokeDashArray: [10, 6],
-          selectable: false,
-          evented: false,
-          excludeFromExport: true,
-        });
+    if (orientation === "horizontal") {
+      if (horizontalGuideRef.current) canvas.remove(horizontalGuideRef.current);
+      const y = artboard.height / 2;
+      const guide = new fabric.Line([0, y, artboard.width, y], {
+        stroke: "oklch(0.55 0.28 295)",
+        strokeWidth: 2,
+        selectable: false,
+        evented: false,
+        excludeFromExport: true,
+      });
+      (guide as fabric.Line & { isGuideLine?: boolean }).isGuideLine = true;
+      horizontalGuideRef.current = guide;
+      setHorizontalGuideY(y);
+      canvas.add(guide);
+      canvas.bringObjectToFront(guide);
+      canvas.requestRenderAll();
+      return;
+    }
 
+    const guide = new fabric.Line([artboard.width / 2, 0, artboard.width / 2, artboard.height], {
+      stroke: "#00A3FF",
+      strokeWidth: 2,
+      strokeDashArray: [10, 6],
+      selectable: false,
+      evented: false,
+      excludeFromExport: true,
+    });
     (guide as fabric.Line & { isGuideLine?: boolean }).isGuideLine = true;
     canvas.add(guide);
     canvas.bringObjectToFront(guide);
@@ -438,6 +450,7 @@ const PageBoard = memo(function PageBoard({
       <div
         id={isActive ? "canvas-workspace" : undefined}
         data-page-id={pageId}
+        ref={paperRef}
         onContextMenu={onContextMenu}
         className={
           "relative bg-white transition-shadow " +
@@ -448,6 +461,23 @@ const PageBoard = memo(function PageBoard({
         style={pageStyle}
       >
         <canvas ref={canvasElRef} />
+        {horizontalGuideY !== null && (
+          <HorizontalGuide
+            paperRef={paperRef}
+            guideY={horizontalGuideY}
+            pageHeight={artboard.height}
+            zoom={zoom}
+            onMove={nextY => {
+              setHorizontalGuideY(nextY);
+              const guide = horizontalGuideRef.current;
+              const canvas = getPageCanvas(pageId);
+              if (!guide || !canvas) return;
+              guide.set({ top: nextY });
+              guide.setCoords();
+              canvas.requestRenderAll();
+            }}
+          />
+        )}
         {/* Superior Overlay Canvas for Magic Brush */}
         {isActive && isMagicBrushActive && (
           <OverlayPaintCanvas pageId={pageId} width={w} height={h} />
@@ -486,6 +516,81 @@ const PageBoard = memo(function PageBoard({
     </div>
   );
 });
+
+function HorizontalGuide({
+  paperRef,
+  guideY,
+  pageHeight,
+  zoom,
+  onMove,
+}: {
+  paperRef: React.RefObject<HTMLDivElement | null>;
+  guideY: number;
+  pageHeight: number;
+  zoom: number;
+  onMove: (y: number) => void;
+}) {
+  const guideRef = useRef<HTMLDivElement | null>(null);
+
+  useLayoutEffect(() => {
+    const updatePosition = () => {
+      const paper = paperRef.current;
+      const guide = guideRef.current;
+      if (!paper || !guide) return;
+      const rect = paper.getBoundingClientRect();
+      guide.style.top = `${rect.top + guideY * (zoom / 100)}px`;
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [guideY, pageHeight, paperRef, zoom]);
+
+  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const move = (pointerEvent: PointerEvent) => {
+      const paper = paperRef.current;
+      if (!paper) return;
+      const rect = paper.getBoundingClientRect();
+      const nextY = Math.max(0, Math.min(
+        pageHeight,
+        (pointerEvent.clientY - rect.top) / (zoom / 100),
+      ));
+      onMove(nextY);
+    };
+    const finish = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", finish);
+      window.removeEventListener("pointercancel", finish);
+    };
+
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", finish, { once: true });
+    window.addEventListener("pointercancel", finish, { once: true });
+  }, [onMove, pageHeight, paperRef, zoom]);
+
+  return createPortal(
+    <div
+      ref={guideRef}
+      onPointerDown={handlePointerDown}
+      className="fixed left-0 right-0 z-[60] h-3 -translate-y-1/2 cursor-ns-resize touch-none"
+      style={{ top: 0 }}
+      aria-label={`Guia horizontal: ${Math.round(guideY)} px`}
+    >
+      <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-primary" />
+      <span className="absolute left-1 top-1/2 -translate-y-1/2 rounded-sm bg-primary px-1 text-[10px] font-semibold leading-5 text-primary-foreground">
+        {Math.round(guideY)}
+      </span>
+    </div>,
+    document.body,
+  );
+}
 
 /**
  * The "+ Adicionar Imagem" CTA — lives INSIDE its own page, absolutely
