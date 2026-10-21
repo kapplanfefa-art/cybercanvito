@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import {
   Copy, PaintRoller, Clipboard, CopyPlus, Trash2, Layers, AlignStartVertical,
   MoveHorizontal, Hexagon, MessageCircle, LockKeyhole, Link, Clock, Accessibility,
-  Wallpaper, Palette, Download, Search, Info, ChevronRight, Crown,
+  Wallpaper, Palette, Download, Search, Info, ImagePlus, ChevronRight, Crown,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,10 +19,11 @@ interface MenuEntry {
   divider?: boolean;
   muted?: boolean;
   premium?: boolean;
-  action?: "copy" | "paste" | "delete" | "layers";
+  action?: "copy" | "paste" | "delete" | "layers" | "add-media";
 }
 
 const entries: MenuEntry[] = [
+  { label: "Adicionar imagem ou vídeo", icon: ImagePlus, action: "add-media" },
   { label: "Copiar", icon: Copy, shortcut: "Ctrl+C", action: "copy" },
   { label: "Copiar estilo", icon: PaintRoller, submenu: true },
   { label: "Colar", icon: Clipboard, shortcut: "Ctrl+V", action: "paste" },
@@ -51,12 +52,13 @@ export interface MediaContextMenuProps extends ComponentProps<"div"> {
   onCopy: () => void;
   onPaste: () => void;
   onDelete: () => void;
+  onAddMedia: () => void;
   canDelete: boolean;
   canvas: Canvas | null;
 }
 
 /** Only explicitly requested actions are enabled. */
-export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, canDelete, canvas, className, ...props }: MediaContextMenuProps) {
+export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, onAddMedia, canDelete, canvas, className, ...props }: MediaContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [layerAnchor, setLayerAnchor] = useState<{ x: number; y: number } | null>(null);
   useLayoutEffect(() => {
@@ -109,6 +111,11 @@ export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, can
                 return;
               }
               if (action === "delete" && !canDelete) return;
+              if (action === "add-media") {
+                onClose();
+                onAddMedia();
+                return;
+              }
               if (action === "copy") onCopy();
               else if (action === "paste") onPaste();
               else onDelete();

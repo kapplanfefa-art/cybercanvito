@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, type ComponentProps } from "react";
 import { createPortal } from "react-dom";
 import {
   CopyPlus, FilePlus2, MessageCircle, MoveHorizontal,
-  Hash, Video, ChevronRight, Crown, type LucideIcon,
+  Hash, Video, ImagePlus, ChevronRight, Crown, type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,11 +14,12 @@ interface PageMenuEntry {
   submenu?: boolean;
   divider?: boolean;
   premium?: boolean;
-  action?: "duplicate";
+  action?: "duplicate" | "add-media";
 }
 
 /** Page-level options shown while the paper holds no image and no video. */
 const entries: PageMenuEntry[] = [
+  { label: "Adicionar imagem ou vídeo", icon: ImagePlus, action: "add-media" },
   { label: "Duplicar página", icon: CopyPlus, shortcut: "Ctrl+D", action: "duplicate" },
   { label: "Adicionar página", icon: FilePlus2, shortcut: "Ctrl+Enter", divider: true },
   { label: "Comentar", icon: MessageCircle, shortcut: "Ctrl+Alt+N", divider: true },
@@ -32,10 +33,11 @@ export interface PageContextMenuProps extends ComponentProps<"div"> {
   y: number;
   onClose: () => void;
   onDuplicatePage?: () => void;
+  onAddMedia: () => void;
 }
 
 /** Only explicitly requested actions are enabled; every other entry stays inert. */
-export function PageContextMenu({ x, y, onClose, onDuplicatePage, className, ...props }: PageContextMenuProps) {
+export function PageContextMenu({ x, y, onClose, onDuplicatePage, onAddMedia, className, ...props }: PageContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const menu = ref.current;
@@ -77,7 +79,11 @@ export function PageContextMenu({ x, y, onClose, onDuplicatePage, className, ...
             variant="ghost"
             role="menuitem"
             aria-disabled={!action}
-            onClick={action === "duplicate" ? () => { onDuplicatePage?.(); onClose(); } : undefined}
+            onClick={action ? () => {
+              onClose();
+              if (action === "add-media") onAddMedia();
+              else onDuplicatePage?.();
+            } : undefined}
             className={cn("h-9 w-full justify-start gap-2 rounded-lg px-2 text-left text-sm font-normal text-card-foreground hover:bg-context-hover hover:text-card-foreground focus-visible:bg-context-hover [&_svg]:size-5")}
           >
             <Icon aria-hidden="true" />
