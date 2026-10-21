@@ -4,7 +4,7 @@ import { ImagePlus, Plus, Trash2, ChevronUp, ChevronDown, Video } from "lucide-r
 import { toast } from "sonner";
 import type * as fabric from "fabric";
 import { useEditor, type UploadedFile } from "./editor-context";
-import { clipboardShortcut, createMediaClipboard } from "./media-clipboard";
+import { clipboardShortcut, createMediaClipboard, snapshotMedia } from "./media-clipboard";
 import { MediaContextMenu } from "./MediaContextMenu";
 import { PageContextMenu } from "./PageContextMenu";
 import { canRemoveMedia, deletionShortcut, pageContextMenu as pageContextMenuKind } from "./media-menu-policy";
@@ -63,6 +63,34 @@ export const Canvas = memo(function Canvas() {
       canvas.setActiveObject(copy);
       canvas.requestRenderAll();
     }).catch(() => toast.error("Não foi possível colar o elemento."));
+  }, []);
+  const duplicateMedia = useCallback(async (canvas: fabric.Canvas | null) => {
+    if (!canvas) return;
+    const selected = canvas.getActiveObjects().filter(object => object.isType("image")) as fabric.FabricImage[];
+    if (!selected.length) return;
+
+    try {
+      const copies = await Promise.all(selected.map(async source => {
+        const center = source.getCenterPoint();
+        const snapshot = await snapshotMedia(source);
+        const copy = await snapshot.instantiate();
+        copy.set({
+          left: center.x + 20,
+          top: center.y + 20,
+          originX: "center",
+          originY: "center",
+        });
+        return copy;
+      }));
+
+      if (canvas.disposed || canvas.destroyed) return;
+      copies.forEach(copy => canvas.add(copy));
+      if (copies.length === 1) canvas.setActiveObject(copies[0]);
+      else canvas.setActiveObject(new fabric.ActiveSelection(copies, { canvas }));
+      canvas.requestRenderAll();
+    } catch {
+      toast.error("Não foi possível duplicar a mídia.");
+    }
   }, []);
 
   // ---------- Drag & drop on the entire workspace ----------
@@ -178,6 +206,7 @@ export const Canvas = memo(function Canvas() {
               index={idx}
               onCopy={copyMedia}
               onPaste={pasteMedia}
+              onDuplicate={duplicateMedia}
               onDelete={deleteActiveObject}
             />
           ))}
@@ -223,12 +252,14 @@ const PageBoard = memo(function PageBoard({
   index,
   onCopy,
   onPaste,
+  onDuplicate,
   onDelete,
 }: {
   pageId: string;
   index: number;
   onCopy: (canvas: fabric.Canvas | null) => void;
   onPaste: (canvas: fabric.Canvas | null) => void;
+  onDuplicate: (canvas: fabric.Canvas | null) => void;
   onDelete: () => void;
 }) {
   const canvasElRef = useRef<HTMLCanvasElement | null>(null);
@@ -398,6 +429,7 @@ const PageBoard = memo(function PageBoard({
             canvas={getPageCanvas(pageId)}
             onCopy={() => onCopy(getPageCanvas(pageId))}
             onPaste={() => onPaste(getPageCanvas(pageId))}
+            onDuplicate={() => onDuplicate(getPageCanvas(pageId))}
             canDelete={canRemoveMedia(getPageCanvas(pageId)?.getActiveObject())}
             onDelete={() => {
               if (canRemoveMedia(getPageCanvas(pageId)?.getActiveObject())) onDelete();

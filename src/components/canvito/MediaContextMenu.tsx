@@ -19,7 +19,7 @@ interface MenuEntry {
   divider?: boolean;
   muted?: boolean;
   premium?: boolean;
-  action?: "copy" | "paste" | "delete" | "layers" | "add-media";
+  action?: "copy" | "paste" | "duplicate" | "delete" | "layers" | "add-media";
 }
 
 const entries: MenuEntry[] = [
@@ -27,7 +27,7 @@ const entries: MenuEntry[] = [
   { label: "Copiar", icon: Copy, shortcut: "Ctrl+C", action: "copy" },
   { label: "Copiar estilo", icon: PaintRoller, submenu: true },
   { label: "Colar", icon: Clipboard, shortcut: "Ctrl+V", action: "paste" },
-  { label: "Duplicar", icon: CopyPlus, shortcut: "Ctrl+D" },
+  { label: "Duplicar", icon: CopyPlus, shortcut: "Ctrl+D", action: "duplicate" },
   { label: "Excluir", icon: Trash2, shortcut: "DELETE", action: "delete" },
   { label: "Camada", icon: Layers, submenu: true, divider: true, action: "layers" },
   { label: "Alinhar à página", icon: AlignStartVertical, submenu: true },
@@ -51,6 +51,7 @@ export interface MediaContextMenuProps extends ComponentProps<"div"> {
   onClose: () => void;
   onCopy: () => void;
   onPaste: () => void;
+  onDuplicate: () => void;
   onDelete: () => void;
   onAddMedia: () => void;
   canDelete: boolean;
@@ -58,7 +59,7 @@ export interface MediaContextMenuProps extends ComponentProps<"div"> {
 }
 
 /** Only explicitly requested actions are enabled. */
-export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, onAddMedia, canDelete, canvas, className, ...props }: MediaContextMenuProps) {
+export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDuplicate, onDelete, onAddMedia, canDelete, canvas, className, ...props }: MediaContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [layerAnchor, setLayerAnchor] = useState<{ x: number; y: number } | null>(null);
   useLayoutEffect(() => {
@@ -118,6 +119,7 @@ export function MediaContextMenu({ x, y, onClose, onCopy, onPaste, onDelete, onA
               }
               if (action === "copy") onCopy();
               else if (action === "paste") onPaste();
+              else if (action === "duplicate") onDuplicate();
               else onDelete();
               onClose();
             } : undefined}
