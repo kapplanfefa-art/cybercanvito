@@ -514,6 +514,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         backgroundColor: "transparent",
         preserveObjectStacking: true,
         selection: true,
+        selectionKey: "ctrlKey",
         renderOnAddRemove: true
       });
       // Pages registered after a zoom change must adopt the current zoom;
