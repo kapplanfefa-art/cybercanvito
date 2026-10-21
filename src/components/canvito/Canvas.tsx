@@ -208,6 +208,7 @@ export const Canvas = memo(function Canvas() {
               onPaste={pasteMedia}
               onDuplicate={duplicateMedia}
               onDelete={deleteActiveObject}
+              onAddPage={addPage}
             />
           ))}
 
@@ -254,6 +255,7 @@ const PageBoard = memo(function PageBoard({
   onPaste,
   onDuplicate,
   onDelete,
+  onAddPage,
 }: {
   pageId: string;
   index: number;
@@ -261,6 +263,7 @@ const PageBoard = memo(function PageBoard({
   onPaste: (canvas: fabric.Canvas | null) => void;
   onDuplicate: (canvas: fabric.Canvas | null) => void;
   onDelete: () => void;
+  onAddPage: () => void;
 }) {
   const canvasElRef = useRef<HTMLCanvasElement | null>(null);
   const {
@@ -437,7 +440,7 @@ const PageBoard = memo(function PageBoard({
           />
         )}
         {contextMenu?.kind === "page" && (
-          <PageContextMenu x={contextMenu.x} y={contextMenu.y} onClose={closeContextMenu} onDuplicatePage={() => duplicatePage(pageId)} onAddMedia={() => openImagePicker({ pageId }, "media")} />
+          <PageContextMenu x={contextMenu.x} y={contextMenu.y} onClose={closeContextMenu} onDuplicatePage={() => duplicatePage(pageId)} onAddMedia={() => openImagePicker({ pageId }, "media")} onAddPage={onAddPage} />
         )}
       </div>
     </div>
