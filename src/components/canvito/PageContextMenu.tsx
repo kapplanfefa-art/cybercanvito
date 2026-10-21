@@ -1,8 +1,8 @@
-import { useLayoutEffect, useRef, type ComponentProps } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ComponentProps } from "react";
 import { createPortal } from "react-dom";
 import {
   CopyPlus, FilePlus2, MessageCircle, MoveHorizontal,
-  Hash, Video, ImagePlus, ChevronRight, Crown, type LucideIcon,
+  Hash, Video, ImagePlus, ChevronRight, Crown, MoveVertical, type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ interface PageMenuEntry {
   submenu?: boolean;
   divider?: boolean;
   premium?: boolean;
-  action?: "duplicate" | "add-media" | "add-page" | "resize-page";
+  action?: "duplicate" | "add-media" | "add-page" | "resize-page" | "guides";
 }
 
 /** Page-level options shown while the paper holds no image and no video. */
@@ -24,7 +24,7 @@ const entries: PageMenuEntry[] = [
   { label: "Adicionar página", icon: FilePlus2, shortcut: "Ctrl+Enter", divider: true, action: "add-page" },
   { label: "Comentar", icon: MessageCircle, shortcut: "Ctrl+Alt+N", divider: true },
   { label: "Redimensionar página", icon: MoveHorizontal, premium: true, divider: true, action: "resize-page" },
-  { label: "Guias", icon: Hash, submenu: true },
+  { label: "Guias", icon: Hash, submenu: true, action: "guides" },
   { label: "Editar como vídeo", icon: Video },
 ];
 
@@ -36,11 +36,25 @@ export interface PageContextMenuProps extends ComponentProps<"div"> {
   onAddMedia: () => void;
   onAddPage: () => void;
   onResizePage: () => void;
+  onAddGuide: (orientation: "horizontal" | "vertical") => void;
 }
 
 /** Only explicitly requested actions are enabled; every other entry stays inert. */
-export function PageContextMenu({ x, y, onClose, onDuplicatePage, onAddMedia, onAddPage, onResizePage, className, ...props }: PageContextMenuProps) {
+export function PageContextMenu({ x, y, onClose, onDuplicatePage, onAddMedia, onAddPage, onResizePage, onAddGuide, className, ...props }: PageContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const guideCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [guideAnchor, setGuideAnchor] = useState<{ x: number; y: number } | null>(null);
+
+  const clearGuideClose = () => {
+    if (guideCloseTimer.current) clearTimeout(guideCloseTimer.current);
+    guideCloseTimer.current = null;
+  };
+  const scheduleGuideClose = () => {
+    clearGuideClose();
+    guideCloseTimer.current = setTimeout(() => setGuideAnchor(null), 160);
+  };
+
+  useEffect(() => () => clearGuideClose(), []);
   useLayoutEffect(() => {
     const menu = ref.current;
     if (!menu) return;
@@ -81,7 +95,20 @@ export function PageContextMenu({ x, y, onClose, onDuplicatePage, onAddMedia, on
             variant="ghost"
             role="menuitem"
             aria-disabled={!action}
-            onClick={action ? () => {
+            aria-haspopup={action === "guides" ? "menu" : undefined}
+            aria-expanded={action === "guides" ? Boolean(guideAnchor) : undefined}
+            onMouseEnter={action === "guides" ? event => {
+              clearGuideClose();
+              const rect = event.currentTarget.getBoundingClientRect();
+              setGuideAnchor({ x: rect.right - 6, y: rect.top });
+            } : undefined}
+            onMouseLeave={action === "guides" ? scheduleGuideClose : undefined}
+            onClick={action ? event => {
+              if (action === "guides") {
+                const rect = event.currentTarget.getBoundingClientRect();
+                setGuideAnchor(previous => previous ? null : { x: rect.right - 6, y: rect.top });
+                return;
+              }
               onClose();
               if (action === "add-media") onAddMedia();
               else if (action === "add-page") onAddPage();
@@ -98,6 +125,75 @@ export function PageContextMenu({ x, y, onClose, onDuplicatePage, onAddMedia, on
           </Button>
         </div>
       ))}
+      {guideAnchor && (
+        <GuideSubmenu
+          x={guideAnchor.x}
+          y={guideAnchor.y}
+          onMouseEnter={clearGuideClose}
+          onMouseLeave={scheduleGuideClose}
+          onSelect={orientation => {
+            onClose();
+            onAddGuide(orientation);
+          }}
+        />
+      )}
     </div>, document.body,
+  );
+}
+
+function GuideSubmenu({
+  x,
+  y,
+  onSelect,
+  onMouseEnter,
+  onMouseLeave,
+}: {
+  x: number;
+  y: number;
+  onSelect: (orientation: "horizontal" | "vertical") => void;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const menu = ref.current;
+    if (!menu) return;
+    const rect = menu.getBoundingClientRect();
+    menu.style.left = `${Math.max(8, Math.min(x, window.innerWidth - rect.width - 8))}px`;
+    menu.style.top = `${Math.max(8, Math.min(y, window.innerHeight - rect.height - 8))}px`;
+  }, [x, y]);
+
+  return createPortal(
+    <div
+      ref={ref}
+      role="menu"
+      aria-label="Opções de guias"
+      className="media-context-menu fixed z-[110] w-[280px] max-w-[calc(100vw-16px)] rounded-2xl border border-border bg-card p-1.5 text-card-foreground shadow-lg"
+      onMouseDown={event => event.stopPropagation()}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onContextMenu={event => { event.preventDefault(); event.stopPropagation(); }}
+    >
+      <Button
+        variant="ghost"
+        role="menuitem"
+        onClick={() => onSelect("horizontal")}
+        className="h-9 w-full justify-start gap-2 rounded-lg px-2 text-left text-sm font-normal text-card-foreground hover:bg-context-hover hover:text-card-foreground [&_svg]:size-5"
+      >
+        <MoveHorizontal aria-hidden="true" />
+        <span>Adicionar guia horizontal</span>
+      </Button>
+      <Button
+        variant="ghost"
+        role="menuitem"
+        onClick={() => onSelect("vertical")}
+        className="h-9 w-full justify-start gap-2 rounded-lg px-2 text-left text-sm font-normal text-card-foreground hover:bg-context-hover hover:text-card-foreground [&_svg]:size-5"
+      >
+        <MoveVertical aria-hidden="true" />
+        <span>Adicionar guia vertical</span>
+      </Button>
+    </div>,
+    document.body,
   );
 }

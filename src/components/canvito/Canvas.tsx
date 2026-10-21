@@ -337,6 +337,34 @@ const PageBoard = memo(function PageBoard({
     openImagePicker(x === undefined || y === undefined ? { pageId } : { pageId, x, y });
   }, [openImagePicker, pageId, setActivePageId]);
 
+  const onAddGuide = useCallback((orientation: "horizontal" | "vertical") => {
+    const canvas = getPageCanvas(pageId);
+    if (!canvas) return;
+
+    const guide = orientation === "horizontal"
+      ? new fabric.Line([0, artboard.height / 2, artboard.width, artboard.height / 2], {
+          stroke: "#00A3FF",
+          strokeWidth: 2,
+          strokeDashArray: [10, 6],
+          selectable: false,
+          evented: false,
+          excludeFromExport: true,
+        })
+      : new fabric.Line([artboard.width / 2, 0, artboard.width / 2, artboard.height], {
+          stroke: "#00A3FF",
+          strokeWidth: 2,
+          strokeDashArray: [10, 6],
+          selectable: false,
+          evented: false,
+          excludeFromExport: true,
+        });
+
+    (guide as fabric.Line & { isGuideLine?: boolean }).isGuideLine = true;
+    canvas.add(guide);
+    canvas.bringObjectToFront(guide);
+    canvas.requestRenderAll();
+  }, [artboard.height, artboard.width, getPageCanvas, pageId]);
+
 
 
   const pageStyle = useMemo(() => ({
@@ -442,7 +470,16 @@ const PageBoard = memo(function PageBoard({
           />
         )}
         {contextMenu?.kind === "page" && (
-          <PageContextMenu x={contextMenu.x} y={contextMenu.y} onClose={closeContextMenu} onDuplicatePage={() => duplicatePage(pageId)} onAddMedia={() => openImagePicker({ pageId }, "media")} onAddPage={onAddPage} onResizePage={() => setIsResizeOpen(true)} />
+          <PageContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            onClose={closeContextMenu}
+            onDuplicatePage={() => duplicatePage(pageId)}
+            onAddMedia={() => openImagePicker({ pageId }, "media")}
+            onAddPage={onAddPage}
+            onResizePage={() => setIsResizeOpen(true)}
+            onAddGuide={onAddGuide}
+          />
         )}
         <ResizeModal open={isResizeOpen} onOpenChange={setIsResizeOpen} />
       </div>
