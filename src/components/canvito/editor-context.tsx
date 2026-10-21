@@ -1324,40 +1324,41 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       
       const input = document.createElement("input");
       input.type = "file";
+      input.multiple = true;
       
       input.accept = mediaPickerAccept(mode);
       
       input.style.display = "none";
       input.addEventListener("change", async () => {
-        const f = input.files?.[0];
+        const files = Array.from(input.files ?? []);
         const target = pendingInsertAtRef.current;
         pendingInsertAtRef.current = null;
-        
-        if (f) {
+
+        if (target?.pageId) {
+          activePageIdRef.current = target.pageId;
+          setActivePageIdState(target.pageId);
+          setActiveCanvas(canvasesRef.current.get(target.pageId) ?? null);
+        }
+
+        for (const file of files) {
           const MAX_SIZE = 200 * 1024 * 1024; // 200MB
-          if (f.size > MAX_SIZE) {
-            toast.error("O arquivo deve ter no máximo 200MB");
-            input.remove();
-            return;
+          if (file.size > MAX_SIZE) {
+            toast.error(`O arquivo "${file.name}" deve ter no máximo 200MB`);
+            continue;
           }
 
           // Criar uma URL de objeto (Blob) para evitar problemas com base64 e memória
-          const objectUrl = URL.createObjectURL(f);
-          
-          if (target?.pageId) {
-            activePageIdRef.current = target.pageId;
-            setActivePageIdState(target.pageId);
-            setActiveCanvas(canvasesRef.current.get(target.pageId) ?? null);
-          }
-          if (isVideoUpload(mode, f.type)) {
+          const objectUrl = URL.createObjectURL(file);
+
+          if (isVideoUpload(mode, file.type)) {
             await addVideoFromSource(objectUrl);
           } else {
-            // Para imagens, mantemos a lógica de inserção no canvas, 
-            // mas usamos o objectUrl em vez de ler como base64 se possível
-            await addImageFromSource(objectUrl, target ?? undefined, f.name);
+            // Para imagens, usamos objectUrl para evitar problemas com base64 e memória
+            await addImageFromSource(objectUrl, target ?? undefined, file.name);
             toast.success("Imagem carregada com sucesso!");
           }
         }
+
         input.remove();
       });
       document.body.appendChild(input);
