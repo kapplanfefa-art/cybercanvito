@@ -8,3 +8,4 @@
 - Keep keyboard deletion eligibility in the media policy module; delete selected content through the editor action, never a page or content being edited.
 - Keep media stacking commands in a dedicated layer module; preserve the artboard below content and notify Fabric history after each actual reorder.
 - Keep the empty-paper right-click menu in its own portal component, chosen by the page-content policy, and leave every entry inert until an action is explicitly requested.
+- Keep image/video upload acceptance and file-kind dispatch in the shared media-upload policy; both context menus use the existing picker with an explicit page target so uploads reach the clicked paper.
