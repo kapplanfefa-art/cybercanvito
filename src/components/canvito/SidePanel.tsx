@@ -71,6 +71,7 @@ export const SidePanel = memo(function SidePanel({
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [shapesOpen, setShapesOpen] = useState(false);
+  const [basicShapesOpen, setBasicShapesOpen] = useState(false);
   const [linesOpen, setLinesOpen] = useState(false);
   const [iconsOpen, setIconsOpen] = useState(false);
   const [stickersOpen, setStickersOpen] = useState(false);
@@ -85,6 +86,7 @@ export const SidePanel = memo(function SidePanel({
   // Reset shapes view when switching tools
   useEffect(() => {
     setShapesOpen(false);
+    setBasicShapesOpen(false);
     setLinesOpen(false);
     setIconsOpen(false);
     setStickersOpen(false);
@@ -108,34 +110,34 @@ export const SidePanel = memo(function SidePanel({
   const Icon = tool.icon;
 
   return (
-    <div className="relative z-40 flex h-full w-[min(16rem,calc(100vw-56px))] shrink-0 flex-col overflow-hidden border-r border-white/10 bg-[var(--panel)] text-white shadow-panel animate-in slide-in-from-left-4 duration-200 md:w-80">
-      <div className="flex items-start justify-between gap-2 border-b border-white/10 p-4">
+    <div className="relative z-40 flex h-full w-[min(16rem,calc(100vw-56px))] shrink-0 flex-col overflow-hidden border-r border-border bg-card text-card-foreground shadow-panel animate-in slide-in-from-left-4 duration-200 md:w-80">
+      <div className="flex items-start justify-between gap-2 border-b border-border p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-neon-glow shadow-neon">
             <Icon className="h-4 w-4 text-white" strokeWidth={2} />
           </div>
           <div>
             <h2 className="text-sm font-bold tracking-wide">{content.title}</h2>
-            <p className="text-xs text-white/60">{content.description}</p>
+            <p className="text-xs text-muted-foreground">{content.description}</p>
           </div>
         </div>
         <button
           onClick={handleClose}
-          className="rounded-md p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+          className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-card-foreground"
           aria-label="Fechar"
         >
           <X className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="border-b border-white/10 p-3">
+      <div className="border-b border-border p-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/50" />
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
             placeholder="Pesquisar..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-md bg-white/5 py-2 pl-9 pr-3 text-sm text-white outline-none ring-1 ring-white/10 transition-all placeholder:text-white/40 focus:ring-[var(--electric-blue)]"
+            className="w-full rounded-md border border-border bg-card py-2 pl-9 pr-3 text-sm text-card-foreground outline-none transition-all placeholder:text-muted-foreground focus:ring-2 focus:ring-[var(--electric-blue)]"
           />
         </div>
       </div>
@@ -149,6 +151,10 @@ export const SidePanel = memo(function SidePanel({
           <div className="flex flex-col gap-3">
             <button
               onClick={() => {
+                if (basicShapesOpen) {
+                  setBasicShapesOpen(false);
+                  return;
+                }
                 setShapesOpen(false);
                 setLinesOpen(false);
                 setIconsOpen(false);
@@ -158,15 +164,15 @@ export const SidePanel = memo(function SidePanel({
                 setGridsOpen(false);
                 setTablesOpen(false);
               }}
-              className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white"
+              className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-card-foreground"
             >
               <ArrowLeft className="h-3 w-3" /> Voltar
             </button>
             <div className="flex items-center justify-between">
               <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-                {shapesOpen ? "Formas" : linesOpen ? "Linhas" : iconsOpen ? "Ícones" : stickersOpen ? "Adesivos" : graphicsOpen ? "Gráficos" : framesOpen ? "Frames" : gridsOpen ? "Grelhas" : "Tabelas"}
+                {basicShapesOpen ? "Formas Básicas" : shapesOpen ? "Formas" : linesOpen ? "Linhas" : iconsOpen ? "Ícones" : stickersOpen ? "Adesivos" : graphicsOpen ? "Gráficos" : framesOpen ? "Frames" : gridsOpen ? "Grelhas" : "Tabelas"}
               </h3>
-              <span className="text-[10px] text-white/30">
+              <span className="text-[10px] text-muted-foreground">
                 {shapesOpen 
                   ? `${SHAPES.length} formas` 
                   : linesOpen 
@@ -184,6 +190,15 @@ export const SidePanel = memo(function SidePanel({
                               : `${TABLES.length} tabelas`}
               </span>
             </div>
+            {shapesOpen && !basicShapesOpen ? (
+              <button
+                onClick={() => setBasicShapesOpen(true)}
+                className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-accent hover:bg-secondary/50"
+              >
+                <ShapesIcon className="h-5 w-5 text-primary" />
+                <span className="text-xs font-semibold text-card-foreground">Formas Básicas</span>
+              </button>
+            ) : (
             <div className="grid grid-cols-3 gap-2">
               {(shapesOpen ? SHAPES : linesOpen ? LINES : iconsOpen ? ICONS : stickersOpen ? STICKERS : graphicsOpen ? GRAPHICS : framesOpen ? FRAMES : gridsOpen ? GRIDS : TABLES).map((item) => (
                 <button
@@ -203,6 +218,12 @@ export const SidePanel = memo(function SidePanel({
                 </button>
               ))}
             </div>
+            )}
+            {basicShapesOpen && (
+              <p className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+                Nenhuma forma básica disponível.
+              </p>
+            )}
           </div>
         ) : (
           <div className="flex flex-col gap-6">
@@ -228,7 +249,7 @@ export const SidePanel = memo(function SidePanel({
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40">Arquivos Recentes</h3>
-                  <span className="text-[10px] text-white/30">{filteredFiles.length} arquivos</span>
+                  <span className="text-[10px] text-muted-foreground">{filteredFiles.length} arquivos</span>
                 </div>
                 
                 {filteredFiles.length > 0 ? (
@@ -243,7 +264,7 @@ export const SidePanel = memo(function SidePanel({
                             addVideoFromSource(file.url);
                           }
                         }}
-                        className="group relative aspect-square overflow-hidden rounded-md border border-white/10 bg-white/5 transition-all hover:border-[var(--electric-blue)] hover:bg-white/10"
+                        className="group relative aspect-square overflow-hidden rounded-md border border-border bg-card transition-all hover:border-accent hover:bg-secondary/50"
                       >
                         {file.type === "image" ? (
                           <img 
@@ -286,7 +307,7 @@ export const SidePanel = memo(function SidePanel({
                 ) : (
                   <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-white/10 py-8 text-center">
                     <ImageIcon className="mb-2 h-8 w-8 text-white/10" />
-                    <p className="px-4 text-[10px] text-white/40 uppercase tracking-wider">
+                    <p className="px-4 text-[10px] text-muted-foreground uppercase tracking-wider">
                       {searchQuery ? "Nenhum arquivo encontrado" : "Nenhum arquivo carregado ainda"}
                     </p>
                   </div>
@@ -370,10 +391,10 @@ const PanelItem = memo(function PanelItem({
         className={`group relative flex flex-col items-center justify-center gap-2 rounded-lg border p-3 transition-all ${
           isMagicBrush && isMagicBrushActive 
             ? "border-[var(--neon-pink)] bg-[var(--neon-pink)]/10 shadow-[0_0_12px_oklch(0.55_0.28_295/0.2)]" 
-            : "border-white/10 bg-white/5 hover:border-[var(--electric-blue)]/60 hover:bg-white/10"
+            : "border-border bg-card hover:border-accent hover:bg-secondary/50"
         }`}
       >
-        <div className={`flex h-8 w-8 items-center justify-center rounded-md ${isMagicBrush && isMagicBrushActive ? "text-[var(--neon-pink)]" : "text-white/70 group-hover:text-white"}`}>
+        <div className={`flex h-8 w-8 items-center justify-center rounded-md ${isMagicBrush && isMagicBrushActive ? "text-[var(--neon-pink)]" : "text-muted-foreground group-hover:text-card-foreground"}`}>
           {item === "Pincel mágico" && <Sparkles className="h-5 w-5" />}
           {item === "Laço inteligente" && <Scissors className="h-5 w-5" />}
           {item === "Auto-detecção" && <Scan className="h-5 w-5" />}
@@ -390,7 +411,7 @@ const PanelItem = memo(function PanelItem({
           {item === "Tabelas" && <Table className="h-5 w-5" />}
           {!["Pincel mágico", "Laço inteligente", "Auto-detecção", "Imagens", "Vídeos", "Áudio", "Formas", "Linhas", "Ícones", "Adesivos", "Gráficos", "Frames", "Grelhas", "Tabelas"].includes(item) && <div className="h-5 w-5 rounded-full border border-current opacity-20" />}
         </div>
-        <span className={`text-[10px] font-medium uppercase tracking-wider ${isMagicBrush && isMagicBrushActive ? "text-white" : "text-white/60 group-hover:text-white/90"}`}>
+        <span className={`text-[10px] font-medium uppercase tracking-wider ${isMagicBrush && isMagicBrushActive ? "text-card-foreground" : "text-muted-foreground group-hover:text-card-foreground"}`}>
           {item}
         </span>
       </button>
@@ -406,10 +427,10 @@ const MagicBrushSettings = () => {
   const { brushSize, setBrushSize, clearMagicBrush, applyMagicRemoval, setIsMagicBrushActive, isProcessingMagic } = useEditor();
   
   return (
-    <div className="mt-1 flex flex-col gap-4 rounded-lg bg-white/5 p-4 border border-white/10">
+    <div className="mt-1 flex flex-col gap-4 rounded-lg border border-border bg-secondary/50 p-4">
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-white/40">Tamanho do Pincel</label>
+          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tamanho do Pincel</label>
           <span className="text-[10px] font-mono text-[var(--neon-pink)]">
             {brushSize}px
           </span>
@@ -438,14 +459,14 @@ const MagicBrushSettings = () => {
         <div className="flex gap-2">
           <button
             onClick={clearMagicBrush}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-white/10 bg-white/5 py-2 text-[10px] font-bold uppercase tracking-wider text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-border bg-card py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:bg-secondary hover:text-card-foreground"
           >
             <Trash2 className="h-3 w-3" />
             Limpar
           </button>
           <button
             onClick={() => setIsMagicBrushActive(false)}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-white/10 bg-white/5 py-2 text-[10px] font-bold uppercase tracking-wider text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-border bg-card py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:bg-secondary hover:text-card-foreground"
           >
             <ArrowLeft className="h-3 w-3" />
             Voltar
