@@ -157,6 +157,19 @@
   }
 }
 
+/* Keep the opened sidebar panel readable on its white background. */
+main > :nth-child(2) {
+  color: var(--panel-foreground);
+}
+
+main > :nth-child(2) :not(svg):not(svg *) {
+  color: var(--panel-foreground) !important;
+}
+
+main > :nth-child(2) svg {
+  color: var(--electric-blue) !important;
+}
+
 @media print {
   @page {
     margin: 0;
