@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Image as ImageIcon, Loader2, Video, Wand2 } from "lucide-react";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ export function AiMagicPanel() {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
+  const promptInputRef = useRef<HTMLTextAreaElement>(null);
   const gerarImg = useServerFn(gerarImagemAgnes);
   const criarVid = useServerFn(criarVideoAgnes);
   const consultarVid = useServerFn(consultarVideoAgnes);
@@ -21,7 +22,8 @@ export function AiMagicPanel() {
     const text = prompt.trim();
     if (loading) return;
     if (!text) {
-      toast.error("Descreva o que você quer gerar.");
+      toast.error("Escreva uma descrição para gerar a imagem ou o vídeo.");
+      promptInputRef.current?.focus();
       return;
     }
     setLoading(true);
@@ -76,6 +78,7 @@ export function AiMagicPanel() {
         {tab("video", "Vídeo", Video)}
       </div>
       <textarea
+        ref={promptInputRef}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         placeholder={mode === "imagem" ? "Ex.: um gato astronauta neon cyberpunk..." : "Ex.: câmera voando sobre uma cidade neon à noite..."}
