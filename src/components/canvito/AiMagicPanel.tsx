@@ -19,7 +19,7 @@ export function AiMagicPanel() {
   const { addImageFromSource, addVideoFromSource } = useEditor();
 
   const run = useCallback(async () => {
-    const text = prompt.trim();
+    const text = (promptInputRef.current?.value ?? prompt).trim();
     if (loading) return;
     if (!text) {
       toast.error("Escreva uma descrição para gerar a imagem ou o vídeo.");
