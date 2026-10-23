@@ -56,7 +56,7 @@
   --foreground: oklch(0.98 0.01 280);
 
   --panel: oklch(0.22 0.06 285);
-  --panel-foreground: oklch(0.98 0.01 280);
+  --panel-foreground: oklch(0 0 0);
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.18 0.04 280);
@@ -118,6 +118,13 @@
 }
 
 @layer utilities {
+  input[placeholder*="Pesquisar"] {
+    color: var(--context-muted);
+  }
+  input[placeholder*="Pesquisar"]::placeholder {
+    color: var(--context-muted);
+    opacity: 1;
+  }
   .text-color-spectrum {
     background-image: var(--gradient-text-color-spectrum);
   }
