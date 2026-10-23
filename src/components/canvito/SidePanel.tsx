@@ -345,7 +345,8 @@ const PanelItem = memo(function PanelItem({
   onOpenTables?: () => void;
 }) {
   const { isMagicBrushActive, setIsMagicBrushActive, openImagePicker } = useEditor();
-  const isMagicBrush = activeToolId === "removedor-objetos" && item === "Pincel mágico";
+  const isObjectRemover = activeToolId === "removedor-objetos";
+  const isMagicBrush = isObjectRemover && item === "Pincel mágico";
   const isUploadImagens = activeToolId === "uploads" && item === "Imagens";
   const isUploadVideos = activeToolId === "uploads" && item === "Vídeos";
   const isShapes = activeToolId === "elementos" && item === "Formas";
@@ -358,6 +359,7 @@ const PanelItem = memo(function PanelItem({
   const isTables = activeToolId === "elementos" && item === "Tabelas";
 
   const handleClick = () => {
+    if (isObjectRemover) return;
     if (isMagicBrush) {
       setIsMagicBrushActive(!isMagicBrushActive);
     } else if (isUploadImagens) {
@@ -388,7 +390,11 @@ const PanelItem = memo(function PanelItem({
     <div className={isMagicBrush ? "col-span-2 flex flex-col gap-3" : "flex flex-col gap-2"}>
       <button 
         onClick={handleClick}
+        disabled={isObjectRemover}
         className={`group relative flex flex-col items-center justify-center gap-2 rounded-lg border p-3 transition-all ${
+          isObjectRemover
+            ? "cursor-not-allowed border-border bg-card opacity-50"
+            :
           isMagicBrush && isMagicBrushActive 
             ? "border-[var(--neon-pink)] bg-[var(--neon-pink)]/10 shadow-[0_0_12px_oklch(0.55_0.28_295/0.2)]" 
             : "border-border bg-card hover:border-accent hover:bg-secondary/50"
