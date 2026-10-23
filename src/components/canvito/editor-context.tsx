@@ -166,11 +166,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setIsMagicBrushActive = useCallback((active: boolean) => {
-    if (active) {
-      toast.info("O removedor de objetos está desativado.");
-      return;
-    }
-    setIsMagicBrushActiveState(false);
+    setIsMagicBrushActiveState(active);
     canvasesRef.current.forEach(c => {
       (c as any)._editorCtx = { ...((c as any)._editorCtx || {}), isMagicBrushActive: active };
       
