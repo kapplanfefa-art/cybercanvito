@@ -19,7 +19,11 @@ export function AiMagicPanel() {
 
   const run = useCallback(async () => {
     const text = prompt.trim();
-    if (!text || loading) return;
+    if (loading) return;
+    if (!text) {
+      toast.error("Descreva o que você quer gerar.");
+      return;
+    }
     setLoading(true);
     try {
       if (mode === "imagem") {
@@ -80,7 +84,7 @@ export function AiMagicPanel() {
       />
       <button
         onClick={run}
-        disabled={loading || !prompt.trim()}
+        disabled={loading}
         className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-[var(--neon-violet)] to-[var(--neon-pink)] text-sm font-bold text-white shadow-neon transition-all hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
