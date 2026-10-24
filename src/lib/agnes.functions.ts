@@ -1,12 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { AgnesGenerationInput, agnesImageRequest } from "./agnes-generation";
 
 const API_ROOT = "https://apihub.agnes-ai.com";
-
-const AgnesInput = z.object({
-  prompt: z.string().min(1, "Descreva o que você quer gerar"),
-  imageBase64: z.string().optional(),
-});
 
 type AgnesImageResponse = {
   data?: Array<{ url?: string; b64_json?: string }>;
@@ -24,7 +20,7 @@ function toBase64(buf: ArrayBuffer): string {
 }
 
 export const gerarImagemAgnes = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => AgnesInput.parse(input))
+  .inputValidator((input: unknown) => AgnesGenerationInput.parse(input))
   .handler(async ({ data }) => {
     const apiKey = process.env["AGNES_API_KEY"];
     if (!apiKey) {
@@ -32,11 +28,7 @@ export const gerarImagemAgnes = createServerFn({ method: "POST" })
     }
 
     try {
-      const body: Record<string, unknown> = {
-        model: "agnes-image-2.1-flash",
-        prompt: data.prompt,
-      };
-      if (data.imageBase64) body.image = data.imageBase64;
+      const body = agnesImageRequest(data.prompt);
 
       const res = await fetch(`${API_ROOT}/v1/images/generations`, {
         method: "POST",
