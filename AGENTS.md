@@ -1,4 +1,5 @@
 # Project rules
+- Keep Agnes text-generation input validation and request construction in a shared tested module; only IA Mágica imports Agnes server functions, so removal tools cannot accidentally invoke generation.
 - Keep Fabric character formatting and range-aware toolbar synchronization in dedicated text-formatting modules so object defaults never override a selected range accidentally.
 - Run the adjacent text-formatting regression tests when changing formatting scope or selection behavior.
 - Keep the image/video context menu in a dedicated portal outside the clipped artboard; enable only explicitly requested actions so it remains visible near page edges without unrequested mutations.

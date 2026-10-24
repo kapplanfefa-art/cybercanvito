@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useStat
 import { createPortal } from "react-dom";
 import { ImagePlus, Plus, Trash2, ChevronUp, ChevronDown, Video } from "lucide-react";
 import { toast } from "sonner";
-import type * as fabric from "fabric";
+import * as fabric from "fabric";
 import { useEditor, type UploadedFile } from "./editor-context";
 import { clipboardShortcut, createMediaClipboard, snapshotMedia } from "./media-clipboard";
 import { MediaContextMenu } from "./MediaContextMenu";

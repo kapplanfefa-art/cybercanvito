@@ -46,3 +46,8 @@
 # Adicionar mídia pelos dois menus
 - [x] Acrescentar e ativar “Adicionar imagem ou vídeo” no menu da página e no menu de mídia.
 - [x] Verificar inserção na página clicada e reabertura dos menus.
+
+# Correção da IA Mágica
+- [x] Corrigir pedido de imagens conforme documentação (tamanho obrigatório); corrigir importação de Fabric que impedia compilação.
+- [x] Garantir uso exclusivo na IA Mágica, sem conexão ao removedor de objetos; rejeitar entradas de edição e máscaras.
+- [x] Verificar imagem gerada e adicionada ao papel no editor; 25 testes aprovados. Vídeo preservado, sem nova geração por bloqueio de saldo relatado anteriormente.
