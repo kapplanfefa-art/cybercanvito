@@ -46,3 +46,8 @@
 # Adicionar mídia pelos dois menus
 - [x] Acrescentar e ativar “Adicionar imagem ou vídeo” no menu da página e no menu de mídia.
 - [x] Verificar inserção na página clicada e reabertura dos menus.
+
+# Correção da IA Mágica
+- [ ] Diagnosticar e corrigir o erro de imagens da Agnes.
+- [ ] Garantir uso exclusivo na IA Mágica, sem conexão ao removedor de objetos.
+- [ ] Verificar geração no editor e executar regressões.
