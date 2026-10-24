@@ -77,15 +77,20 @@ export function AiMagicPanel() {
         {tab("imagem", "Imagem", ImageIcon)}
         {tab("video", "Vídeo", Video)}
       </div>
-      <textarea
-        ref={promptInputRef}
-        aria-label="Descrição para gerar"
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        placeholder={mode === "imagem" ? "Ex.: um gato astronauta neon cyberpunk..." : "Ex.: câmera voando sobre uma cidade neon à noite..."}
-        rows={4}
-        className="w-full resize-none rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/35 outline-none focus:border-[var(--electric-blue)]"
-      />
+      <label className="flex flex-col gap-1.5">
+        <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+          Descrição
+        </span>
+        <textarea
+          ref={promptInputRef}
+          aria-label="Descrição para gerar"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder={mode === "imagem" ? "Ex.: um gato astronauta neon cyberpunk..." : "Ex.: câmera voando sobre uma cidade neon à noite..."}
+          rows={4}
+          className="w-full resize-none rounded-lg border-2 border-electric-blue bg-card px-3 py-3 text-sm text-panel-foreground shadow-field outline-none placeholder:text-muted-foreground/70 focus:border-electric-blue"
+        />
+      </label>
       <button
         onClick={run}
         disabled={loading}

@@ -37,6 +37,7 @@
   --color-context-border: var(--context-border);
   --color-context-hover: var(--context-hover);
   --color-context-muted: var(--context-muted);
+  --shadow-field: 0 0 0 3px color-mix(in oklab, var(--electric-blue) 18%, transparent), 0 0 18px color-mix(in oklab, var(--electric-blue) 28%, transparent);
 }
 
 :root {
