@@ -79,6 +79,7 @@ export function AiMagicPanel() {
       </div>
       <textarea
         ref={promptInputRef}
+        aria-label="Descrição para gerar"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         placeholder={mode === "imagem" ? "Ex.: um gato astronauta neon cyberpunk..." : "Ex.: câmera voando sobre uma cidade neon à noite..."}

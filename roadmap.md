@@ -51,3 +51,7 @@
 - [x] Corrigir pedido de imagens conforme documentação (tamanho obrigatório); corrigir importação de Fabric que impedia compilação.
 - [x] Garantir uso exclusivo na IA Mágica, sem conexão ao removedor de objetos; rejeitar entradas de edição e máscaras.
 - [x] Verificar imagem gerada e adicionada ao papel no editor; 25 testes aprovados. Vídeo preservado, sem nova geração por bloqueio de saldo relatado anteriormente.
+
+# Campo de descrição da IA Mágica
+- [x] Retirar a pesquisa da IA Mágica para evitar confusão com a descrição; manter pesquisa nas demais abas.
+- [x] Verificar descrição preenchida, geração e aviso somente com campo vazio; imagem adicionada ao papel e pesquisa das demais abas preservada.
