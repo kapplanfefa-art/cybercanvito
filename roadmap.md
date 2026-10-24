@@ -54,4 +54,4 @@
 
 # Campo de descrição da IA Mágica
 - [x] Retirar a pesquisa da IA Mágica para evitar confusão com a descrição; manter pesquisa nas demais abas.
-- [ ] Verificar descrição preenchida, geração e aviso somente com campo vazio.
+- [x] Verificar descrição preenchida, geração e aviso somente com campo vazio; imagem adicionada ao papel e pesquisa das demais abas preservada.
