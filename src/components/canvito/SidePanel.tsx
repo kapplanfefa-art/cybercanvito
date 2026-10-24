@@ -130,7 +130,7 @@ export const SidePanel = memo(function SidePanel({
         </button>
       </div>
 
-      <div className="border-b border-border p-3">
+      {active !== "ia-magica" && <div className="border-b border-border p-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -140,7 +140,7 @@ export const SidePanel = memo(function SidePanel({
             className="w-full rounded-md border border-border bg-card py-2 pl-9 pr-3 text-sm text-card-foreground outline-none transition-all placeholder:text-muted-foreground focus:ring-2 focus:ring-[var(--electric-blue)]"
           />
         </div>
-      </div>
+      </div>}
 
       <div className="flex-1 overflow-y-auto p-3">
         {active === "ia-magica" ? (
