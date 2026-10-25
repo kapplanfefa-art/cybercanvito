@@ -58,3 +58,7 @@
 # Borda do campo de descrição
 - [x] Deixar o campo de escrita óbvio: borda azul elétrico, halo e rótulo.
 - [x] Verificar abertura, digitação e legibilidade no editor.
+
+# Modelos flash gratuitos da Agnes
+- [x] Trocar imagem para agnes-image-2.5-flash e vídeo para agnes-video-2.5-flash, mantendo 720P; testes atualizados.
+- [x] Verificar imagem gerada e adicionada ao papel no editor. Vídeo aceito pelo modelo, com fila da Agnes cheia no momento.
