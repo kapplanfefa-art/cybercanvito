@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { AgnesGenerationInput, agnesImageRequest } from "./agnes-generation";
 
 describe("Agnes text generation", () => {
-  it("sends the documented required image size and original model", () => {
+  it("sends the documented required image size and the free flash model", () => {
     expect(agnesImageRequest("Um gato")).toEqual({
-      model: "agnes-image-2.1-flash", prompt: "Um gato", size: "1K", return_base64: true,
+      model: "agnes-image-2.5-flash", prompt: "Um gato", size: "1K", return_base64: true,
     });
   });
   it("rejects image editing inputs instead of connecting generation to removal", () => {
