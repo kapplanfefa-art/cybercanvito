@@ -7,7 +7,7 @@ export const AgnesGenerationInput = z.object({
 
 export function agnesImageRequest(prompt: string) {
   return {
-    model: "agnes-image-2.1-flash",
+    model: "agnes-image-2.5-flash",
     prompt: AgnesGenerationInput.parse({ prompt }).prompt,
     size: "1K",
     return_base64: true,
